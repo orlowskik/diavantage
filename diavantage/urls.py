@@ -20,12 +20,17 @@ from rest_framework import routers
 
 
 
-from diaweb.views import UserViewSet
+from diaweb.views import PatientViewSet, PhysicianViewSet, AddressViewSet, GlucoseViewSet, BloodViewSet, \
+    AppointmentViewSet, ReceptionViewSet
 
 router = routers.DefaultRouter()
-router.register(r'users', UserViewSet)
-
-
+router.register(r'patients', PatientViewSet)
+router.register(r'physicians', PhysicianViewSet)
+router.register(r'addresses', AddressViewSet)
+router.register(r'glucose', GlucoseViewSet)
+router.register(r'bloods', BloodViewSet)
+router.register(r'appointments', AppointmentViewSet)
+router.register(r'receptions', ReceptionViewSet)
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('', include(router.urls)),
