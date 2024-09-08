@@ -1,4 +1,6 @@
 import datetime
+
+from django.core.exceptions import ValidationError
 from freezegun import freeze_time
 
 
@@ -34,7 +36,7 @@ class DataProvider:
                                                   phone='1234567890',
                                                   )
 
-class AddressTestCase(TestCase):
+class TestAddressModel(TestCase):
     def setUp(self):
         Address.objects.create(
             country="Country",
@@ -106,6 +108,11 @@ class TestPatientModel(TestCase):
         age = self.patient.get_age()
         self.assertEqual(age, 24)
 
+    def test_future_birthday_validation(self):
+        with self.assertRaises(ValidationError):
+            Patient.objects.create(user=self.data.user1, sex='M', birthdate=timezone.now().date()+datetime.timedelta(days=1))
+
+
     def test_diagnosis_method(self):
         diagnosis = self.patient.get_prediction()
         self.assertEqual(diagnosis, "Not Performed")
@@ -120,7 +127,17 @@ class TestPatientModel(TestCase):
         self.assertEqual(self.patient.address.number, self.data.address.number)
         self.assertEqual(self.patient.address.apartment, self.data.address.apartment)
 
-class TestPhysician(TestCase):
+    def test_patient_unique_user(self):
+        with self.assertRaises(IntegrityError):
+            Patient.objects.create(user=self.data.user1, birthdate=datetime.date(2000,1,1), sex='F' )
+
+    def test_patient_unique_user_physician(self):
+        Physician.objects.create(user=self.data.user2, specialty='General Physician', phone='1234567890',)
+        with self.assertRaises(IntegrityError):
+            Patient.objects.create(user=self.data.user2, birthdate=datetime.date(2000, 5, 5),
+                                   sex='M',)
+
+class TestPhysicianModel(TestCase):
 
     def setUp(self):
         self.data = DataProvider()
@@ -129,9 +146,6 @@ class TestPhysician(TestCase):
         self.physician = Physician.objects.create(user=self.data.user1, specialty=self.specialty, phone=self.phone,
                                                   address=self.data.address)
         self.physician.patient.add(self.data.patient)
-
-    def tearDown(self):
-        self.physician.delete()
 
     def test_physician_creation(self):
         self.assertTrue(isinstance(self.physician, Physician))
@@ -150,7 +164,16 @@ class TestPhysician(TestCase):
         self.assertEqual(self.physician.patient.first().sex, 'M')
         self.assertEqual(self.physician.patient.first().user.username, 'testuser3')
 
-class GlucoseTestCase(TestCase):
+    def test_physician_unique_user(self):
+        with self.assertRaises(IntegrityError):
+            Physician.objects.create(user=self.data.user1, specialty=self.specialty, phone=self.phone,
+                                    address=self.data.address)
+
+    def test_physician_unique_user_patient(self):
+        with self.assertRaises(IntegrityError):
+            Physician.objects.create(user=self.data.patient.user, specialty=self.specialty, phone=self.phone)
+
+class TestGlucoseModel(TestCase):
 
     def setUp(self):
         self.data = DataProvider()
@@ -185,6 +208,14 @@ class GlucoseTestCase(TestCase):
         with self.assertRaises(IntegrityError):
             Glucose.objects.create(patient=self.data.patient, measurement=5.6)
 
+    def test_glucose_future_date_validation(self):
+        with self.assertRaises(ValidationError):
+            Glucose.objects.create(patient=self.data.patient, measurement=5.6, measurement_date=timezone.now()+datetime.timedelta(days=1))
+
+    def test_glucose_positive_measurement_value(self):
+        with self.assertRaises(IntegrityError):
+            Glucose.objects.create(patient=self.data.patient, measurement=-5.6, measurement_date=timezone.now())
+
 @freeze_time('2024-01-07')
 class TestBloodModel(TestCase):
 
@@ -215,7 +246,37 @@ class TestBloodModel(TestCase):
         self.assertEqual(self.blood.patient.id, self.data.patient.id)
         self.assertEqual(self.blood.patient.user.first_name, self.data.patient.user.first_name)
 
-class TestReception(TestCase):
+    def test_blood_systolic_pressure_validation(self):
+        with self.assertRaises(IntegrityError):
+            Blood.objects.create(patient=self.data.patient,
+                                 systolic_pressure=-119,
+                                 diastolic_pressure=80,
+                                 pulse_rate=60,)
+
+    def test_blood_diastolic_pressure_validation(self):
+        with self.assertRaises(IntegrityError):
+            Blood.objects.create(patient=self.data.patient,
+                                 systolic_pressure=119,
+                                 diastolic_pressure=-80,
+                                 pulse_rate=60,)
+
+    def test_blood_pulse_ratio_validation(self):
+        with self.assertRaises(IntegrityError):
+            Blood.objects.create(patient=self.data.patient,
+                                 systolic_pressure=119,
+                                 diastolic_pressure=80,
+                                 pulse_rate=-60,)
+
+    def test_blood_measurement_date_validation(self):
+        with self.assertRaises(ValidationError):
+            Blood.objects.create(patient=self.data.patient,
+                                 systolic_pressure=119,
+                                 diastolic_pressure=80,
+                                 pulse_rate=60,
+                                 measurement_date=timezone.now()+datetime.timedelta(days=1)
+                                 )
+
+class TestReceptionModel(TestCase):
 
     def setUp(self):
         self.data = DataProvider()
@@ -264,7 +325,7 @@ class TestReception(TestCase):
 
         self.assertIsNone(reception.physician)
 
-class TestAppointment(TestCase):
+class TestAppointmentModel(TestCase):
 
     def setUp(self):
         self.data = DataProvider()

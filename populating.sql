@@ -33,19 +33,19 @@ VALUES ('jdoe', 'John', 'Doe', 'johndoe@example.com', 'password123', 0, 1, '2024
 
 
 INSERT INTO diaweb_physician (user_id, specialty, phone)
-VALUES (12, 'Cardiology', '123-456-7890'),
-       (13, 'Dermatology', '234-567-8901'),
-       (14, 'Neurology', '345-678-9012'),
-       (15, 'Pediatrics', '456-789-0123');
+VALUES (1, 'Cardiology', '123-456-7890'),
+       (2, 'Dermatology', '234-567-8901'),
+       (3, 'Neurology', '345-678-9012'),
+       (4, 'Pediatrics', '456-789-0123');
 
 
 UPDATE diaweb_physician
 SET address_id = 1
-WHERE user_id IN (12, 13);
+WHERE user_id IN (1, 2);
 
 UPDATE diaweb_physician
 SET address_id = 2
-WHERE user_id IN (14, 15);
+WHERE user_id IN (3, 4);
 
 
 INSERT INTO diaweb_patient (user_id, birthdate, sex, classifier_result, confirmed_diabetes, address_id)
