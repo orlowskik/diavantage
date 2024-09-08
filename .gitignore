@@ -167,3 +167,4 @@ cython_debug/
 .idea/
 
 env.ps1
+diaweb/migrations/*

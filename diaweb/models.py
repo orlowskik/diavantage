@@ -1,7 +1,11 @@
-from datetime import date
-from django.db import models
+from datetime import date, datetime
+from tabnanny import check
+
+from django.db import models, IntegrityError
 from django.contrib.auth.models import User
 from django.utils import timezone
+from django.core.validators import MinValueValidator
+from django.core.exceptions import ValidationError
 
 
 # Create your models here.
@@ -48,6 +52,13 @@ class Patient(models.Model):
     def get_prediction(self):
         return self.PREDICTIONS[self.classifier_result]
 
+    def save(self, **kwargs):
+        if self.birthdate > timezone.now().date():
+            raise ValidationError('Future date restricted')
+        if Physician.objects.filter(user=self.user).exists():
+            raise IntegrityError
+        super().save(**kwargs)
+
 class Physician(models.Model):
 
     user      = models.OneToOneField(User, on_delete=models.CASCADE)
@@ -59,24 +70,52 @@ class Physician(models.Model):
     def __str__(self):
         return f'{self.user.first_name} {self.user.last_name} - {self.specialty}'
 
+    def save(self, **kwargs):
+        if Patient.objects.filter(user=self.user).exists():
+            raise IntegrityError
+        super().save(**kwargs)
+
 class Glucose(models.Model):
 
     patient          = models.ForeignKey(Patient, on_delete=models.CASCADE)
-    measurement      = models.FloatField()
+    measurement      = models.FloatField(validators=[MinValueValidator(0)])
     measurement_date = models.DateTimeField()
 
     def __str__(self):
         return f'{self.measurement}'
 
+    class Meta:
+        constraints = [
+            models.CheckConstraint(check=models.Q(measurement__gte=0), name='Glucose_positive_number'),
+        ]
+
+    def save(self, **kwargs):
+        if isinstance(self.measurement_date, datetime):
+            if self.measurement_date > timezone.now():
+                raise ValidationError('Future date restricted')
+        super().save(**kwargs)
 
 class Blood(models.Model):
 
     patient             = models.ForeignKey(Patient, on_delete=models.CASCADE)
-    systolic_pressure   = models.IntegerField()
-    diastolic_pressure  = models.IntegerField()
-    pulse_rate          = models.IntegerField()
+    systolic_pressure   = models.IntegerField(validators=[MinValueValidator(0)])
+    diastolic_pressure  = models.IntegerField(validators=[MinValueValidator(0)])
+    pulse_rate          = models.IntegerField(validators=[MinValueValidator(0)])
     measurement_date    = models.DateTimeField(default=timezone.now)
 
+
+    class Meta:
+        constraints = [
+            models.CheckConstraint(check=models.Q(systolic_pressure__gte=0), name='Systolic_pressure_positive_number'),
+            models.CheckConstraint(check=models.Q(diastolic_pressure__gte=0), name='Diastolic_pressure_positive_number'),
+            models.CheckConstraint(check=models.Q(pulse_rate__gte=0), name='Pulse_rate_positive_number'),
+        ]
+
+    def save(self, **kwargs):
+        if isinstance(self.measurement_date, datetime):
+            if self.measurement_date > timezone.now():
+                raise ValidationError('Future date restricted')
+        super().save(**kwargs)
 
 class Appointment(models.Model):
 
@@ -87,7 +126,17 @@ class Appointment(models.Model):
 
 class Reception(models.Model):
 
-    day = models.DateField()
+    DAYS = {
+        1 : "Monday",
+        2 : "Tuesday",
+        3 : "Wednesday",
+        4 : "Thursday",
+        5 : "Friday",
+        6 : "Saturday",
+        7 : "Sunday"
+    }
+
+    day = models.CharField(max_length=20, choices=DAYS)
     start_time = models.TimeField()
     end_time = models.TimeField()
     physician = models.ForeignKey(Physician, on_delete=models.SET_NULL, null=True, blank=True)
