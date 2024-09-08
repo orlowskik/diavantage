@@ -1,6 +1,7 @@
-from datetime import date, datetime
+from datetime import date
 from django.db import models
 from django.contrib.auth.models import User
+from django.utils import timezone
 
 
 # Create your models here.
@@ -55,12 +56,17 @@ class Physician(models.Model):
     patient   = models.ManyToManyField(Patient)
     address   = models.ForeignKey(Address, on_delete=models.CASCADE, null=True, blank=True, unique=False)
 
+    def __str__(self):
+        return f'{self.user.first_name} {self.user.last_name} - {self.specialty}'
 
 class Glucose(models.Model):
 
     patient          = models.ForeignKey(Patient, on_delete=models.CASCADE)
     measurement      = models.FloatField()
     measurement_date = models.DateTimeField()
+
+    def __str__(self):
+        return f'{self.measurement}'
 
 
 class Blood(models.Model):
@@ -69,13 +75,13 @@ class Blood(models.Model):
     systolic_pressure   = models.IntegerField()
     diastolic_pressure  = models.IntegerField()
     pulse_rate          = models.IntegerField()
-    measurement_date    = models.DateTimeField()
+    measurement_date    = models.DateTimeField(default=timezone.now)
 
 
 class Appointment(models.Model):
 
     patient   = models.ForeignKey(Patient, on_delete=models.CASCADE)
-    physician = models.ForeignKey(Physician, on_delete=models.CASCADE)
+    physician = models.ForeignKey(Physician, on_delete=models.SET_NULL, null=True)
     date      = models.DateTimeField()
 
 
