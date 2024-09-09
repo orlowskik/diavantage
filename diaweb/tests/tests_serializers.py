@@ -3,11 +3,12 @@ from datetime import datetime, date
 
 from django.contrib.auth.models import User
 
-from diaweb.models import Address, Patient
-from diaweb.serializers import AddressSerializer, UserSerializer, PatientSerializer
+from diaweb.models import Address, Patient, Physician
+from diaweb.serializers import AddressSerializer, UserSerializer, PatientSerializer, PhysicianSerializer
 from django.test import TestCase
 from rest_framework.exceptions import ValidationError as DRFValidationError
 
+from diaweb.tests.tests_models import DataProvider
 
 class AddressSerializerTestCase(TestCase):
 
@@ -204,3 +205,39 @@ class TestPatientSerializer(TestCase):
         self.assertEqual(patient.user.email, self.user_data['email'])
         self.assertEqual(patient.address.country, self.address_data['country'])
         self.assertEqual(patient.address.apartment, self.address_data['apartment'])
+
+
+class TestPhysicianSerializer(TestCase):
+    def setUp(self):
+        self.data = DataProvider()
+        self.serializer = PhysicianSerializer(instance=self.data.physician)
+
+    def test_invalid_serializer(self):
+        invalid_data = self.serializer.data.pop('user')
+        self.serializer = PhysicianSerializer(data=invalid_data)
+        self.assertFalse(self.serializer.is_valid())
+
+    def test_contains_expected_fields(self):
+        data = self.serializer.data
+        self.assertCountEqual(data.keys(), set([field.name for field in Physician._meta.fields]))
+
+    def test_valid_serializer_without_address(self):
+        data = self.serializer.data
+        self.data.physician.user.delete()
+        self.data.physician.delete()
+        self.serializer = PhysicianSerializer(data=data)
+        self.assertTrue(self.serializer.is_valid(raise_exception=True))
+        self.assertIsInstance(physician := self.serializer.save(), Physician)
+        self.data.physician = physician
+        self.assertEqual(physician.user.username, data.get('user').get('username'))
+
+    def test_valid_serializer_with_address(self):
+        data = self.serializer.data
+        data['address'] = AddressSerializer(instance=self.data.address).data
+        self.data.physician.user.delete()
+        self.data.physician.delete()
+        self.serializer = PhysicianSerializer(data=data)
+        self.assertTrue(self.serializer.is_valid(raise_exception=True))
+        self.assertIsInstance(physician := self.serializer.save(), Physician)
+        self.assertEqual(physician.address.city, self.data.address.city)
+        self.assertEqual(physician.address.apartment, self.data.address.apartment)
