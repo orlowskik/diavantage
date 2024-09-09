@@ -34,11 +34,22 @@ class PatientSerializer(serializers.ModelSerializer):
 
 class PhysicianSerializer(serializers.ModelSerializer):
     user = UserSerializer()
-    address = AddressSerializer()
+    address = AddressSerializer(allow_null=True, required=False)
 
     class Meta:
         model = Physician
         exclude = ('patient',)
+
+    def create(self, validated_data):
+        user_data = validated_data.pop('user')
+        user = User.objects.create_user(**user_data)
+        if validated_data.get('address') is not None:
+            address_data = validated_data.pop('address')
+            address = Address.objects.create(**address_data)
+            physician = Physician.objects.create(user=user, address=address, **validated_data)
+        else:
+            physician = Physician.objects.create(user=user, **validated_data)
+        return physician
 
 class GlucoseSerializer(serializers.ModelSerializer):
     patient = PatientSerializer()
