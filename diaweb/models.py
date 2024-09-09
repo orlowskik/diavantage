@@ -1,5 +1,4 @@
 from datetime import date, datetime
-from tabnanny import check
 
 from django.db import models, IntegrityError
 from django.contrib.auth.models import User
@@ -9,7 +8,7 @@ from django.core.exceptions import ValidationError
 
 
 # Create your models here.
-
+User._meta.get_field('email')._unique = True
 
 class Address(models.Model):
     country   = models.CharField(max_length=60)

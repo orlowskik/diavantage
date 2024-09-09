@@ -23,6 +23,15 @@ class PatientSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 
+    def create(self, validated_data):
+        user_data = validated_data.pop('user')
+        user = User.objects.create_user(**user_data)
+        address_data = validated_data.pop('address')
+        address = Address.objects.create(**address_data)
+        patient = Patient.objects.create(user=user, address=address, **validated_data)
+        return patient
+
+
 class PhysicianSerializer(serializers.ModelSerializer):
     user = UserSerializer()
     address = AddressSerializer()
