@@ -1,10 +1,12 @@
 import unittest
-from datetime import datetime, date
+from datetime import datetime, date, timedelta
 
 from django.contrib.auth.models import User
+from django.utils import timezone
 
-from diaweb.models import Address, Patient, Physician
-from diaweb.serializers import AddressSerializer, UserSerializer, PatientSerializer, PhysicianSerializer
+from diaweb.models import Address, Patient, Physician, Glucose, Blood
+from diaweb.serializers import AddressSerializer, UserSerializer, PatientSerializer, PhysicianSerializer, \
+    GlucoseSerializer, BloodSerializer
 from django.test import TestCase
 from rest_framework.exceptions import ValidationError as DRFValidationError
 
@@ -241,3 +243,129 @@ class TestPhysicianSerializer(TestCase):
         self.assertIsInstance(physician := self.serializer.save(), Physician)
         self.assertEqual(physician.address.city, self.data.address.city)
         self.assertEqual(physician.address.apartment, self.data.address.apartment)
+
+
+class TestGlucoseSerializer(TestCase):
+
+    def setUp(self):
+        self.data = DataProvider()
+
+    def test_glucose_create(self):
+        patient = Patient.objects.create(user=self.data.user1, birthdate=date(2000,1,1), sex='M')
+        data = {
+            'patient': patient.id,
+            'measurement': 120,
+            'measurement_date': timezone.now()
+        }
+        serializer = GlucoseSerializer(data=data)
+        self.assertTrue(serializer.is_valid())
+        self.assertIsInstance(glucose := serializer.save(), Glucose)
+        self.assertEqual(data['patient'], glucose.patient.id)
+        self.assertEqual(data['measurement'], glucose.measurement)
+        self.assertEqual(data['measurement_date'], glucose.measurement_date)
+
+    def test_invalid_patient(self):
+        data = {
+            'patient': 99,
+            'measurement': 120,
+            'measurement_date': timezone.now()
+        }
+        serializer = GlucoseSerializer(data=data)
+        with self.assertRaises(DRFValidationError):
+            serializer.is_valid(raise_exception=True)
+
+    def test_patient_field_is_required(self):
+        data = {
+            'measurement': 8,
+            'measurement_date': timezone.now()
+        }
+        serializer = GlucoseSerializer(data=data)
+        with self.assertRaises(DRFValidationError):
+            serializer.is_valid(raise_exception=True)
+
+    def test_reading_value_field_is_required(self):
+        patient = Patient.objects.create(user=self.data.user1, birthdate=date(2000,1,1), sex='M')
+        data = {
+            'patient': patient.id,
+            'measurement_date': timezone.now()
+        }
+        serializer = GlucoseSerializer(data=data)
+        with self.assertRaises(DRFValidationError):
+            serializer.is_valid(raise_exception=True)
+
+
+class TestBloodSerializer(TestCase):
+
+    def setUp(self):
+        self.data = DataProvider()
+
+    def test_blood_create(self):
+        data = {
+            "patient" : self.data.patient.id,
+            "systolic_pressure" : 120,
+            "diastolic_pressure" : 70,
+            "pulse_rate" : 140,
+            "measurement_date" : timezone.now()
+        }
+
+        serializer = BloodSerializer(data=data)
+        self.assertTrue(serializer.is_valid())
+        self.assertIsInstance(blood := serializer.save(), Blood)
+        self.assertEqual(data['patient'], blood.patient.id)
+        self.assertEqual(data['measurement_date'], blood.measurement_date)
+
+    def test_invalid_patient(self):
+        data = {
+            'patient': 99,
+            "systolic_pressure" : 120,
+            "diastolic_pressure" : 70,
+            "pulse_rate" : 140,
+            "measurement_date" : timezone.now()
+        }
+        serializer = BloodSerializer(data=data)
+        with self.assertRaises(DRFValidationError):
+            serializer.is_valid(raise_exception=True)
+
+    def test_patient_field_is_required(self):
+        data = {
+            "systolic_pressure" : 120,
+            "diastolic_pressure" : 70,
+            "pulse_rate" : 140,
+            "measurement_date" : timezone.now()
+        }
+        serializer = BloodSerializer(data=data)
+        with self.assertRaises(DRFValidationError):
+            serializer.is_valid(raise_exception=True)
+
+    def test_systolic_field_is_required(self):
+        data = {
+            'patient': self.data.patient.id,
+            "diastolic_pressure" : 70,
+            "pulse_rate" : 140,
+            "measurement_date" : timezone.now()
+        }
+        serializer = BloodSerializer(data=data)
+        with self.assertRaises(DRFValidationError):
+            serializer.is_valid(raise_exception=True)
+
+    def test_diastolic_field_is_required(self):
+        data = {
+            'patient': self.data.patient.id,
+            "systolic_pressure": 70,
+            "pulse_rate": 140,
+            "measurement_date": timezone.now()
+        }
+        serializer = BloodSerializer(data=data)
+        with self.assertRaises(DRFValidationError):
+            serializer.is_valid(raise_exception=True)
+
+    def test_pulse_field_is_required(self):
+        data = {
+            'patient': self.data.patient.id,
+            "diastolic_pressure": 70,
+            "systolic_pressure": 70,
+            "measurement_date": timezone.now()
+        }
+        serializer = BloodSerializer(data=data)
+        with self.assertRaises(DRFValidationError):
+            serializer.is_valid(raise_exception=True)

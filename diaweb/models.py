@@ -78,7 +78,7 @@ class Glucose(models.Model):
 
     patient          = models.ForeignKey(Patient, on_delete=models.CASCADE)
     measurement      = models.FloatField(validators=[MinValueValidator(0)])
-    measurement_date = models.DateTimeField()
+    measurement_date = models.DateTimeField(default=timezone.now)
 
     def __str__(self):
         return f'{self.measurement}'
