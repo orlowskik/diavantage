@@ -33,6 +33,7 @@ router.register(r'appointments', AppointmentViewSet)
 router.register(r'receptions', ReceptionViewSet)
 urlpatterns = [
     path('admin/', admin.site.urls),
+    path('rest-auth/', include('dj_rest_auth.urls')),
     path('', include(router.urls)),
     path('api-auth/', include('rest_framework.urls', namespace='rest_framework'))
 ]
