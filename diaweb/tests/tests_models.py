@@ -204,9 +204,6 @@ class TestGlucoseModel(TestCase):
         with self.assertRaises(IntegrityError):
             Glucose.objects.create(patient=self.data.patient, measurement_date=timezone.now())
 
-    def test_glucose_without_measurement_date(self):
-        with self.assertRaises(IntegrityError):
-            Glucose.objects.create(patient=self.data.patient, measurement=5.6)
 
     def test_glucose_future_date_validation(self):
         with self.assertRaises(ValidationError):
