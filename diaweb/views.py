@@ -1,5 +1,6 @@
 from django.shortcuts import render
 from django.contrib.auth.models import User
+from django.views.generic import TemplateView
 from rest_framework import viewsets
 
 from diaweb.models import Patient, Physician, Address, Glucose, Blood, Appointment, Reception
@@ -35,4 +36,9 @@ class AppointmentViewSet(viewsets.ModelViewSet):
 class ReceptionViewSet(viewsets.ModelViewSet):
     queryset = Reception.objects.all()
     serializer_class = ReceptionSerializer
+
+
+
+class LoginPageView(TemplateView):
+    template_name = 'diaweb/login.html'
 
