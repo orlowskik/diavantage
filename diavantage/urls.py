@@ -21,7 +21,7 @@ from rest_framework import routers
 
 
 from diaweb.views import PatientViewSet, PhysicianViewSet, AddressViewSet, GlucoseViewSet, BloodViewSet, \
-    AppointmentViewSet, ReceptionViewSet
+    AppointmentViewSet, ReceptionViewSet, LoginPageView
 
 router = routers.DefaultRouter()
 router.register(r'patients', PatientViewSet)
@@ -34,8 +34,10 @@ router.register(r'receptions', ReceptionViewSet)
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('rest-auth/', include('dj_rest_auth.urls')),
-    path('', include(router.urls)),
-    path('api-auth/', include('rest_framework.urls', namespace='rest_framework'))
+    path('index/', include(router.urls)),
+    path('api-auth/', include('rest_framework.urls', namespace='rest_framework')),
+
+    path('', LoginPageView.as_view(), name='login'),
 ]
 
 
