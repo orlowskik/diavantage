@@ -1,7 +1,11 @@
+from django.core.serializers import serialize
 from django.shortcuts import render
 from django.contrib.auth.models import User
 from django.views.generic import TemplateView
 from rest_framework import viewsets
+from rest_framework.decorators import action
+from rest_framework.response import Response
+from rest_framework.renderers import TemplateHTMLRenderer
 
 from diaweb.models import Patient, Physician, Address, Glucose, Blood, Appointment, Reception
 from diaweb.serializers import PatientSerializer, PhysicianSerializer, AddressSerializer, \
@@ -12,6 +16,13 @@ from diaweb.serializers import PatientSerializer, PhysicianSerializer, AddressSe
 class PatientViewSet(viewsets.ModelViewSet):
     queryset = Patient.objects.all()
     serializer_class = PatientSerializer
+    renderer_classes = [TemplateHTMLRenderer]
+
+    @action(detail=False, methods=['get'])
+    def get_creation_form(self, request):
+        return Response( {'serializer': self.get_serializer()}, template_name='diaweb/patient_registration.html',)
+
+
 
 class PhysicianViewSet(viewsets.ModelViewSet):
     queryset = Physician.objects.all()
