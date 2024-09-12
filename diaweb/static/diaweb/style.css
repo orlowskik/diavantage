@@ -1,0 +1,25 @@
+#registration_text {
+    padding-top: 5%;
+    color: #abb6b2;
+    font-size: small;
+    font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+    font-style: italic;
+    text-align: left;
+}
+
+#registration_sender{
+    color: #c5bebe;
+}
+
+#registration_sender:hover{
+    color: #954a4a;
+    text-decoration: underline;
+}
+
+#registration_sender:visited{
+    color: #abb6b2;
+}
+
+#btn-creation{
+    width: 2%;
+}

@@ -4,7 +4,9 @@
     <meta charset="UTF-8">
     <title>DiaVantage</title>
     {% load static %}
-
+    
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+    
     <link rel="stylesheet" href="{% static 'diaweb/style.css' %}">
     
     <link rel="stylesheet" href="{% static 'rest_framework/css/bootstrap.min.css' %}">
@@ -12,6 +14,8 @@
     
     <link rel="stylesheet" href="{% static 'rest_framework/css/prettify.css' %}">
     <link rel="stylesheet" href="{% static 'rest_framework/css/default.css' %}">
+    
+    <script type="text/javascript" src="{% static 'diaweb/login_scripts.js' %}"></script>
     
 </head>
 <body class="container">
@@ -50,12 +54,23 @@
                 </div>
               </div>
 
-              
-
               <div class="form-actions-no-box">
                 <input type="submit" name="submit" value="Log in" class="btn btn-primary form-control" id="submit-id-submit">
               </div>
+              
+              <div id="div_id_registration" class="clearfix control-group ">  
+                <p id="registration_text"><a id="registration_sender">Don't have account yet? Register now!</a></p>
+              </div>
+              
+              <div id="div_id_registration_patient" class="form-actions-no-box" >
+                <input type="button" id="btn_patient_registration" class="btn btn-primary form-control btn-creation" value="Patient account" onclick="location.href='{% url 'patient-list'  %}'">
+              </div>
+                
+              <div id="div_id_registration_physician" class="form-actions-no-box" >  
+                <input type="button" id="btn_physician_registration" class="btn btn-primary form-control btn-creation" style="margin-top: 4%" value="Physician account" onclick="location.href='{% url 'physician-list'  %}'">
+              </div>  
             </form>
+            
           </div>
         </div><!-- /.row-fluid -->
       </div><!--/.well-->
