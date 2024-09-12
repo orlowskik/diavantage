@@ -168,3 +168,4 @@ cython_debug/
 
 env.ps1
 diaweb/migrations/*
+static/

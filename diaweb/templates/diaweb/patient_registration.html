@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Patient Registration</title>
+
+    {% load static %}
+    {% load rest_framework %}
+
+    <link rel="stylesheet" href="{% static 'rest_framework/css/bootstrap.min.css' %}">
+    <link rel="stylesheet" href="{% static 'rest_framework/css/bootstrap-tweaks.css' %}">
+
+    <link rel="stylesheet" href="{% static 'rest_framework/css/prettify.css' %}">
+    <link rel="stylesheet" href="{% static 'rest_framework/css/default.css' %}">
+
+
+</head>
+<body>
+
+    <form action="{% url 'rest_framework:login' %}" method="post" novalidate>
+        {% csrf_token %}
+        {% render_form  serializer template_pack='rest_framework/vertical'%}
+        <button type="submit" class="btn btn-primary">Sign in</button>
+    </form>
+
+</body>
+</html>
