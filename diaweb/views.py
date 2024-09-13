@@ -24,7 +24,7 @@ class PatientRegistrationView(APIView):
     template_name = 'diaweb/registration.html'
     style = {'template_pack': 'rest_framework/vertical'}
     serializer = PatientSerializer
-    hidden_fields = ['id', 'confirmed_diabetes', 'classifier_result', 'last_appointment']
+    hidden_fields = ['id', 'confirmed_diabetes', 'classifier_result', 'last_appointment', 'password']
 
     def get(self, request):
         return Response({'serializer': self.serializer, 'style': self.style,
@@ -43,7 +43,7 @@ class PhysicianRegistrationView(APIView):
     template_name = 'diaweb/registration.html'
     style = {'template_pack': 'rest_framework/vertical'}
     serializer = PhysicianSerializer
-    hidden_fields = ['id']
+    hidden_fields = ['id', 'password']
 
     def get(self, request):
         return Response({'serializer': self.serializer, 'style': self.style,
