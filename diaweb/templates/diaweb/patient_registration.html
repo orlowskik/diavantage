@@ -12,16 +12,37 @@
 
     <link rel="stylesheet" href="{% static 'rest_framework/css/prettify.css' %}">
     <link rel="stylesheet" href="{% static 'rest_framework/css/default.css' %}">
+    
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css">
 
 
 </head>
-<body>
+<body class="container">
+  <div class="container-fluid" style="margin-top: 30px">
+    <div class="row-fluid">
+      <div class="well">
+        <div class="row-fluid">
+          <div>
+            <h3 style="margin: 0 0 20px;">Patient Registration Form</h3>
+            <hr>              
+          </div>
+        </div><!-- /row fluid -->
 
-    <form action="{% url 'rest_framework:login' %}" method="post" novalidate>
-        {% csrf_token %}
-        {% render_form  serializer template_pack='rest_framework/vertical'%}
-        <button type="submit" class="btn btn-primary">Sign in</button>
-    </form>
-
+        <div class="row-fluid">
+        <form action="{% url 'patient-list' %}" method="post" >
+            {% csrf_token %}
+            <div>
+                {% for field in serializer %}
+                    {% if field.name not in hidden_fields  %}
+                        {% render_field  field style=style %}
+                    {% endif %}
+                {% endfor %}
+                <button type="submit" class="btn btn-primary">Sign in</button> 
+            </div>
+        </form>
+        </div>
+      </div>
+    </div>
+  </div>
 </body>
 </html>

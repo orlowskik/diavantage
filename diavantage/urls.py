@@ -23,7 +23,7 @@ from rest_framework import routers
 
 
 from diaweb.views import PatientViewSet, PhysicianViewSet, AddressViewSet, GlucoseViewSet, BloodViewSet, \
-    AppointmentViewSet, ReceptionViewSet, LoginPageView
+    AppointmentViewSet, ReceptionViewSet, LoginPageView, PatientRegistrationView
 
 router = routers.DefaultRouter()
 router.register(r'patients', PatientViewSet)
@@ -40,7 +40,7 @@ urlpatterns = [
     path('api-auth/', include('rest_framework.urls', namespace='rest_framework')),
 
     path('', LoginPageView.as_view(), name='login'),
-    # path('patient_creation/' , PatientViewSet.as_view(), name='patient_creation'),
+    path('patient_registration/' , PatientRegistrationView.as_view() , name='patient-registration'),
 ] + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
 
 
