@@ -23,13 +23,13 @@
       <div class="well">
         <div class="row-fluid">
           <div>
-            <h3 style="margin: 0 0 20px;">Patient Registration Form</h3>
+            <h3 style="margin: 0 0 20px;">{{ name }} Registration Form</h3>
             <hr>              
           </div>
         </div><!-- /row fluid -->
 
         <div class="row-fluid">
-        <form action="{% url 'patient-list' %}" method="post" >
+        <form action="{% url target %}" method="post" >
             {% csrf_token %}
             <div>
                 {% for field in serializer %}

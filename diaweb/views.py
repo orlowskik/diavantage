@@ -5,7 +5,7 @@ from django.views.generic import TemplateView
 from rest_framework import viewsets
 from rest_framework.decorators import action, api_view, renderer_classes
 from rest_framework.response import Response
-from rest_framework.renderers import TemplateHTMLRenderer, JSONRenderer, BrowsableAPIRenderer, HTMLFormRenderer
+from rest_framework.renderers import TemplateHTMLRenderer
 from rest_framework.views import APIView
 
 from diaweb.models import Patient, Physician, Address, Glucose, Blood, Appointment, Reception
@@ -21,18 +21,35 @@ class PatientViewSet(viewsets.ModelViewSet):
 
 class PatientRegistrationView(APIView):
     renderer_classes = [TemplateHTMLRenderer]
-    template_name = 'diaweb/patient_registration.html'
+    template_name = 'diaweb/registration.html'
     style = {'template_pack': 'rest_framework/vertical'}
     serializer = PatientSerializer
+    hidden_fields = ['id', 'confirmed_diabetes', 'classifier_result', 'last_appointment']
 
     def get(self, request):
         return Response({'serializer': self.serializer, 'style': self.style,
-                         'hidden_fields': ['id', 'confirmed_diabetes', 'classifier_result', 'last_appointment']})
+                         'hidden_fields': self.hidden_fields, 'name': 'Patient',
+                         'target': 'patient-list'},
+                        )
 
 
 class PhysicianViewSet(viewsets.ModelViewSet):
     queryset = Physician.objects.all()
     serializer_class = PhysicianSerializer
+
+
+class PhysicianRegistrationView(APIView):
+    renderer_classes = [TemplateHTMLRenderer]
+    template_name = 'diaweb/registration.html'
+    style = {'template_pack': 'rest_framework/vertical'}
+    serializer = PhysicianSerializer
+    hidden_fields = ['id']
+
+    def get(self, request):
+        return Response({'serializer': self.serializer, 'style': self.style,
+                         'hidden_fields': self.hidden_fields, 'name': 'Physician',
+                         'target': 'physician-list'},
+                        )
 
 
 class AddressViewSet(viewsets.ModelViewSet):
