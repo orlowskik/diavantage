@@ -340,7 +340,7 @@ class TestAppointmentModel(TestCase):
 
     def test_on_delete_cascade_patient(self):
         patient = self.patient = Patient.objects.create(
-            user=User.objects.create_user(username='testuser', email='user3@test.com', password='<PASSWORD>'),
+            user=User.objects.create_user(username='testuser', email='user6@test.com', password='<PASSWORD>'),
             birthdate=datetime.date(2000, 5, 5),
             sex='M',
         )

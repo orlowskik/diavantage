@@ -76,6 +76,7 @@ class TestUserSerializer(TestCase):
         # Create a user instance
         self.user_attrs = {
             'username': 'testuser',
+            'password': '<PASSWORD>',
             'email': 'testuser@test.com',
             'first_name': 'Test',
             'last_name': 'User'
@@ -86,7 +87,7 @@ class TestUserSerializer(TestCase):
 
     def test_contains_expected_fields(self):
         data = self.serializer.data
-        self.assertSetEqual(set(data.keys()), {'username', 'email', 'first_name', 'last_name'})
+        self.assertSetEqual(set(data.keys()), {'username', 'email', 'password', 'first_name', 'last_name'})
 
     def test_field_content(self):
         data = self.serializer.data
