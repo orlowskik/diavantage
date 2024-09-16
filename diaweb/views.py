@@ -7,16 +7,38 @@ from rest_framework.decorators import action, api_view, renderer_classes
 from rest_framework.response import Response
 from rest_framework.renderers import TemplateHTMLRenderer
 from rest_framework.views import APIView
+from rest_framework.generics import ListAPIView
 
 from diaweb.models import Patient, Physician, Address, Glucose, Blood, Appointment, Reception
 from diaweb.serializers import PatientSerializer, PhysicianSerializer, AddressSerializer, \
     GlucoseSerializer, BloodSerializer, AppointmentSerializer, ReceptionSerializer
 
 
+class BasicPageView(APIView):
+    renderer_classes = [TemplateHTMLRenderer]
+    template_name = "diaweb/diavantage_base.html"
+
+
+    def get(self, request, *args, **kwargs):
+        return Response()
+
+
+
 # Create your views here
 class PatientViewSet(viewsets.ModelViewSet):
     queryset = Patient.objects.all()
     serializer_class = PatientSerializer
+
+
+class PatientListView(ListAPIView):
+    queryset = Patient.objects.all()
+    serializer_class = PatientSerializer
+    renderer_classes = [TemplateHTMLRenderer]
+    template_name = "diaweb/patient_list.html"
+
+    def get(self, request, *args, **kwargs):
+        return Response({'serializer': self.serializer_class, 'style': {'template_pack': 'rest_framework/vertical'}})
+
 
 
 class PatientRegistrationView(APIView):
@@ -29,8 +51,7 @@ class PatientRegistrationView(APIView):
     def get(self, request):
         return Response({'serializer': self.serializer, 'style': self.style,
                          'hidden_fields': self.hidden_fields, 'name': 'Patient',
-                         'target': 'patient-list'},
-                        )
+                         'target': 'patient-list'})
 
 
 class PhysicianViewSet(viewsets.ModelViewSet):
