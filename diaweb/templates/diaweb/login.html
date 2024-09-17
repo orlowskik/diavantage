@@ -15,7 +15,7 @@
     <link rel="stylesheet" href="{% static 'rest_framework/css/prettify.css' %}">
     <link rel="stylesheet" href="{% static 'rest_framework/css/default.css' %}">
     
-    <script type="text/javascript" src="{% static 'diaweb/login_scripts.js' %}"></script>
+    <script type="text/javascript" src="{% static 'diaweb/registration_scripts.js' %}"></script>
     
 </head>
 <body class="container">
@@ -63,11 +63,11 @@
               </div>
               
               <div id="div_id_registration_patient" class="form-actions-no-box" >
-                <input type="button" id="btn_patient_registration" class="btn btn-primary form-control btn-creation" value="Patient account" onclick="location.href='{% url 'patient-registration'  %}'">
+                <input type="button" id="btn_patient_registration" class="btn btn-primary form-control btn-creation" value="Patient account" onclick="location.href='{% url 'naked-registration'  registration_type='patient' %}'">
               </div>
                 
               <div id="div_id_registration_physician" class="form-actions-no-box" >  
-                <input type="button" id="btn_physician_registration" class="btn btn-primary form-control btn-creation" style="margin-top: 4%" value="Physician account" onclick="location.href='{% url 'physician-registration'  %}'">
+                <input type="button" id="btn_physician_registration" class="btn btn-primary form-control btn-creation" style="margin-top: 4%" value="Physician account" onclick="location.href='{% url 'naked-registration' registration_type='physician'  %}'">
               </div>  
             </form>
             
