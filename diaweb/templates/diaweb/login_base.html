@@ -1,0 +1,16 @@
+{% extends 'diaweb/diavantage_base.html' %}
+
+{% block head %}
+    {% load static %}
+    
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+    
+    <link rel="stylesheet" href="{% static 'diaweb/style.css' %}">
+    <script src="{% static 'diaweb/login_scripts.js' %}"></script>
+    
+{% endblock %}
+{% block content %}
+    <iframe src="{% url 'naked_login' %}" class="iframe-full-height" id="iframe-login" onload="resizeIframe(this)"
+            onclick="resizeIframe(this)" frameborder="0" style="width: 100%" scrolling="auto"></iframe>
+{% endblock %}
+    

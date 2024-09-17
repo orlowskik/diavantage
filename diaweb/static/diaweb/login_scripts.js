@@ -1,10 +1,6 @@
-$(document).ready(function () {
-    document.getElementById('div_id_registration_patient').hidden = true;
-    document.getElementById('div_id_registration_physician').hidden = true;
+console.log("hello")
 
-    document.getElementById('registration_sender').addEventListener('click', function() {
-        document.getElementById('div_id_registration_patient').hidden = false;
-        document.getElementById('div_id_registration_physician').hidden = false;
-    })
-})
-
+function resizeIframe(obj) {
+    obj.style.height = 0;
+    obj.style.height = obj.contentWindow.document.body.scrollHeight * 1.3 + 'px';
+}

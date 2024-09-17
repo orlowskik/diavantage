@@ -5,7 +5,9 @@
     <title>DiaVantage</title>
     {% load static %}
     
+    {% block head %}
     <link rel="stylesheet" href="{% static 'diaweb/style.css' %}">
+    {% endblock %}
 
 </head>
 <body>
@@ -16,24 +18,22 @@
     
     <div class="topnav">
         {% block topnav %}
-            <a href="" style="float:right">Login</a>
+            <a href="{% url 'login' %}" style="float:right">Login</a>
         {% endblock %}
     </div>
     
     <div class="row">
+      {% block content %}
       <div class="leftcolumn" style="height:100%;">
-        {% block leftcolumn %}  
         <div class="card" style="height:100%;">
           <h2>TITLE HEADING</h2>
           <h5>Title description, Dec 7, 2017</h5>
           <div class="fakeimg" style="height:200px;">Image</div>
-          <p>Some text..</p>
+          <p>Some text</p>
           <p>Sunt in culpa qui officia deserunt mollit anim id est laborum consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco.</p>
         </div>
-        {% endblock %}  
       </div>
       <div class="rightcolumn">
-        {% block rightcolumn %}
         <div class="card">
           <h2>About Me</h2>
           <div class="fakeimg" style="height:100px;">Image</div>
@@ -45,12 +45,8 @@
           <div class="fakeimg"><p>Image</p></div>
           <div class="fakeimg"><p>Image</p></div>
         </div>
-        <div class="card">
-          <h3>Follow Me</h3>
-          <p>Some text</p>
-        </div>
-        {% endblock %}  
       </div>
+      {% endblock %}
     </div>
     
     <div class="footer">
