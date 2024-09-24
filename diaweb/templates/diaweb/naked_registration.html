@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Patient Registration</title>
+    <title>{{ name }}Registration</title>
 
     {% load static %}
     {% load rest_framework %}
@@ -29,7 +29,7 @@
         </div><!-- /row fluid -->
 
         <div class="row-fluid">
-        <form action="{% url target %}" method="post" >
+        <form action="{% url target %}" method="post" target="_self">
             {% csrf_token %}
             <div>
                 {% for field in serializer %}
@@ -37,13 +37,15 @@
                         {% render_field  field style=style %}
                     {% endif %}
                 {% endfor %}
-                <button type="submit" class="btn btn-primary">Sign in</button> 
+                <button type="submit" class="btn btn-primary">Sign up</button> 
             </div>
         </form>
         </div>
       </div>
     </div>
   </div>
+  
+  <iframe id="catcher" hidden="hidden"></iframe>
 
   <script type="text/javascript">
       document.getElementsByName('user.password')[0].type = 'password';

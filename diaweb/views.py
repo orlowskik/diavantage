@@ -1,3 +1,5 @@
+import json
+
 from django.core.serializers import serialize
 from django.shortcuts import render
 from django.contrib.auth.models import User
@@ -8,7 +10,7 @@ from rest_framework.decorators import action, api_view, renderer_classes
 from rest_framework.response import Response
 from rest_framework.renderers import TemplateHTMLRenderer
 from rest_framework.views import APIView
-from rest_framework.generics import ListAPIView
+
 
 from diaweb.models import Patient, Physician, Address, Glucose, Blood, Appointment, Reception
 from diaweb.serializers import PatientSerializer, PhysicianSerializer, AddressSerializer, \
@@ -30,14 +32,14 @@ class PatientViewSet(viewsets.ModelViewSet):
     serializer_class = PatientSerializer
 
 
-class PatientListView(ListAPIView):
-    queryset = Patient.objects.all()
-    serializer_class = PatientSerializer
-    renderer_classes = [TemplateHTMLRenderer]
-    template_name = "diaweb/patient_list.html"
-
-    def get(self, request, *args, **kwargs):
-        return Response({'serializer': self.serializer_class, 'style': {'template_pack': 'rest_framework/vertical'}})
+# class PatientListView(ListAPIView):
+#     queryset = Patient.objects.all()
+#     serializer_class = PatientSerializer
+#     renderer_classes = [TemplateHTMLRenderer]
+#     template_name = "diaweb/patient_list.html"
+#
+#     def get(self, request, *args, **kwargs):
+#         return Response({'serializer': self.serializer_class, 'style': {'template_pack': 'rest_framework/vertical'}})
 
 
 class PhysicianViewSet(viewsets.ModelViewSet):
@@ -69,6 +71,39 @@ class ReceptionViewSet(viewsets.ModelViewSet):
     serializer_class = ReceptionSerializer
 
 
+class PatientWebViewSet(viewsets.ModelViewSet):
+    queryset = Patient.objects.all()
+    serializer_class = PatientSerializer
+    renderer_classes = [TemplateHTMLRenderer]
+
+    @xframe_options_sameorigin
+    def create(self, request, *args, **kwargs):
+        serializer = self.serializer_class(data=request.data)
+
+        if serializer.is_valid():
+            result = serializer.save()
+        else:
+            return Response(data={"result": json.dumps(serializer.errors, indent=4), 'status': 405}, status=405, template_name='diaweb/creation_response.html')
+        return Response(data={"result": json.dumps(self.serializer_class(result).data, indent=4), 'status': 201}, status=201, template_name='diaweb/creation_response.html')
+
+
+class PhysicianWebViewSet(viewsets.ModelViewSet):
+    queryset = Physician.objects.all()
+    serializer_class = PhysicianSerializer
+    renderer_classes = [TemplateHTMLRenderer]
+
+    @xframe_options_sameorigin
+    def create(self, request, *args, **kwargs):
+        serializer = self.serializer_class(data=request.data)
+
+        if serializer.is_valid():
+            result = serializer.save()
+        else:
+            return Response(data={"result": json.dumps(serializer.errors, indent=4), 'status': 405}, status=405, template_name='diaweb/creation_response.html')
+        return Response(data={"result": json.dumps(self.serializer_class(result).data, indent=4), 'status': 201}, status=201, template_name='diaweb/creation_response.html')
+
+
+
 class LoginPageView(TemplateView):
     template_name = 'diaweb/login_base.html'
 
@@ -88,14 +123,15 @@ def naked_registration_view(request, registration_type):
     serializer = PatientSerializer
     hidden_fields = ['id', 'confirmed_diabetes', 'classifier_result', 'last_appointment']
     name = 'Patient'
-    target = 'patient-list'
+    target = 'web-patient-list'
 
     if registration_type == 'physician':
         serializer = PhysicianSerializer
         hidden_fields = ['id']
         name = 'Physician'
-        target = 'physician-list'
+        target = 'web-physician-list'
 
     return Response({'serializer': serializer, 'style': style,
                          'hidden_fields': hidden_fields, 'name': name,
-                         'target': target}, template_name=template_name)
+                         'target': target, 'registration_type': registration_type},
+                    template_name=template_name)
