@@ -24,7 +24,7 @@ from rest_framework import routers
 
 from diaweb.views import PatientViewSet, PhysicianViewSet, AddressViewSet, GlucoseViewSet, BloodViewSet, \
     AppointmentViewSet, ReceptionViewSet, LoginPageView, \
-    PatientListView, BasicPageView, naked_login_view, naked_registration_view
+    BasicPageView, naked_login_view, naked_registration_view, PatientWebViewSet, PhysicianWebViewSet
 
 router = routers.DefaultRouter()
 router.register(r'patients', PatientViewSet)
@@ -34,10 +34,17 @@ router.register(r'glucose', GlucoseViewSet)
 router.register(r'bloods', BloodViewSet)
 router.register(r'appointments', AppointmentViewSet)
 router.register(r'receptions', ReceptionViewSet)
+
+
+web_router = routers.DefaultRouter()
+web_router.register(r'patients', PatientWebViewSet, basename='web-patient')
+web_router.register(r'physicians', PhysicianWebViewSet, basename='web-physician')
+
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('rest-auth/', include('dj_rest_auth.urls')),
     path('api/', include(router.urls)),
+    path('web/', include(web_router.urls)),
     path('api-auth/', include('rest_framework.urls', namespace='rest_framework')),
 
 
@@ -45,7 +52,6 @@ urlpatterns = [
     path('login/', LoginPageView.as_view(), name='login'),
     path('naked_login/', naked_login_view, name='naked_login'),
     path('naked_registration/<registration_type>/' , naked_registration_view , name='naked-registration'),
-    path('patient_list/' , PatientListView.as_view() , name='patient-list'),
 ] + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
 
 
