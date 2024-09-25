@@ -1,0 +1,51 @@
+{% extends 'rest_framework/base.html' %}
+
+{% block title %}
+    DiaVantage
+{% endblock %}
+
+{% block branding %}
+    <a class="navbar-brand" href="{% url 'index' %}">DiaVantage</a>
+{% endblock %}
+
+{%  block breadcrumbs %}
+    <ul class="breadcrumb">
+        <li class="active"><a href="{% url 'index' %}">Home</a></li>
+    </ul>
+{% endblock %}
+
+{% block content %}
+    <div class="content-main">
+        <div class="page-header">
+            <ul id="registration-nav" class="breadcrumb" style="margin-top: 2%">
+                <li class="active"><h1>Register Now >> </h1></li>
+                <li class="active"><a href="{% url 'login' %}">Patient account</a></li>
+                <li class="active"><a href="{% url 'login' %}">Physician account</a></li>
+            </ul>
+        </div>
+        {% if welcome_msg %}
+            <div class="well" style="margin-top: 2%">
+                {% for key, msg in welcome_msg %}
+                    <div class="row-fluid">
+                        <fieldset style="margin-top: 1%">
+                            <legend>{{ key }}</legend>
+                            {% if msg|length == 1 %}
+                                {% for text in msg %}
+                                    <p class="text-justify">{{ text }}</p>
+                                {% endfor %}
+                            {% else %}
+                                <ul>
+                                {% for text in msg %}
+                                    <li><p class="text-justify">{{ text }}</p></li>
+                                {% endfor %}
+                                </ul>
+                                
+                            {% endif %}
+                            
+                        </fieldset>
+                    </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+    </div>
+{% endblock %}
