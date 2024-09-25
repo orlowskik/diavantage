@@ -1,1 +1,11 @@
-{% extends 'diaweb/diavantage_base.html' %}
+{% extends 'rest_framework/base.html' %}
+
+{% block title %}
+    Patient List
+{% endblock %}
+
+{% block branding %}
+    <a class="navbar-brand" href="{% url 'web-patient-list' %}">DiaVantage</a>
+{% endblock %}
+
+{
