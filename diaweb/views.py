@@ -1,6 +1,5 @@
 import json
 import os
-import numpy as np
 
 from django.conf import settings
 
@@ -9,7 +8,7 @@ from django.views.generic import TemplateView
 from rest_framework import viewsets, status
 from rest_framework.decorators import api_view, renderer_classes
 from rest_framework.response import Response
-from rest_framework.renderers import TemplateHTMLRenderer, JSONRenderer, BrowsableAPIRenderer
+from rest_framework.renderers import TemplateHTMLRenderer, JSONRenderer
 from rest_framework.views import APIView
 
 
@@ -33,17 +32,6 @@ class BasicPageView(TemplateView):
 class PatientViewSet(viewsets.ModelViewSet):
     queryset = Patient.objects.all()
     serializer_class = PatientSerializer
-
-
-# class PatientListView(ListAPIView):
-#     queryset = Patient.objects.all()
-#     serializer_class = PatientSerializer
-#     renderer_classes = [TemplateHTMLRenderer]
-#     template_name = "diaweb/patient_list.html"
-#
-#     def get(self, request, *args, **kwargs):
-#         return Response({'serializer': self.serializer_class, 'style': {'template_pack': 'rest_framework/vertical'}})
-
 
 class PhysicianViewSet(viewsets.ModelViewSet):
     queryset = Physician.objects.all()
@@ -77,43 +65,49 @@ class ReceptionViewSet(viewsets.ModelViewSet):
 class PatientWebViewSet(viewsets.ModelViewSet):
     queryset = Patient.objects.all()
     serializer_class = PatientSerializer
-    renderer_classes = [JSONRenderer, MyTemplateHTMLRenderer,  ]
+    renderer_classes = [JSONRenderer, TemplateHTMLRenderer]
+    style = {'template_pack': 'rest_framework/horizontal'}
+    hidden_fields = ['id', 'confirmed_diabetes', 'classifier_result', 'last_appointment']
 
     def get_queryset(self):
         return self.get_serializer(Patient.objects.all(), many=True).data
 
-    @xframe_options_sameorigin
     def create(self, request, *args, **kwargs):
         serializer = self.serializer_class(data=request.data)
 
         if serializer.is_valid():
             result = serializer.save()
         else:
-            return Response(data={"result": json.dumps(serializer.errors, indent=4), 'status': 400}, status=status.HTTP_400_BAD_REQUEST, template_name='diaweb/creation_response.html')
-        return Response(data={"result": json.dumps(self.serializer_class(result).data, indent=4), 'status': 201}, status=status.HTTP_201_CREATED, template_name='diaweb/creation_response.html',
+            return Response(data={"result": json.dumps(serializer.errors, indent=4), 'status': 400,
+                                  'target': 'web-patient-list', 'serializer': self.get_serializer(),
+                                  'style': self.style, 'hidden_fields': self.hidden_fields},
+                            status=status.HTTP_400_BAD_REQUEST, template_name='diaweb/registration_response.html')
+
+        return Response(data={"result": json.dumps(self.serializer_class(result).data, indent=4), 'status': 201},
+                        status=status.HTTP_201_CREATED, template_name='diaweb/registration_response.html',
                         )
-
-
-    # def list(self, request, *args, **kwargs):
-    #     serializer = self.serializer_class(self.get_queryset(), many=True)
-    #     return Response(data={"result": json.dumps(serializer.data, indent=4), 'status': 200}, status=status.HTTP_200_OK,
-    #                     headers={'X-Frame-Options': 'SAMEORIGIN', 'Content-Type': 'application/json'})
-
 
 class PhysicianWebViewSet(viewsets.ModelViewSet):
     queryset = Physician.objects.all()
     serializer_class = PhysicianSerializer
-    renderer_classes = [MyTemplateHTMLRenderer]
+    renderer_classes = [JSONRenderer, TemplateHTMLRenderer]
+    template_name = 'rest_framework/basic.html'
+    style = {'template_pack': 'rest_framework/horizontal'}
+    hidden_fields = ['id']
 
-    @xframe_options_sameorigin
     def create(self, request, *args, **kwargs):
         serializer = self.serializer_class(data=request.data)
 
         if serializer.is_valid():
             result = serializer.save()
         else:
-            return Response(data={"result": json.dumps(serializer.errors, indent=4), 'status': 405}, status=405, template_name='diaweb/creation_response.html')
-        return Response(data={"result": json.dumps(self.serializer_class(result).data, indent=4), 'status': 201}, status=201, template_name='diaweb/creation_response.html')
+            return Response(data={"result": json.dumps(serializer.errors, indent=4), 'status': 400,
+                                  'target': 'web-physician-list', 'serializer': self.get_serializer(),
+                                  'style': self.style, 'hidden_fields': self.hidden_fields},
+                            status=status.HTTP_400_BAD_REQUEST, template_name='diaweb/registration_response.html')
+
+        return Response(data={"result": json.dumps(self.serializer_class(result).data, indent=4), 'status': 201},
+                        status=status.HTTP_201_CREATED, template_name='diaweb/registration_response.html')
 
 
 
@@ -130,9 +124,9 @@ def naked_login_view(request):
 @xframe_options_sameorigin
 @api_view(['GET'])
 @renderer_classes([TemplateHTMLRenderer])
-def naked_registration_view(request, registration_type):
-    template_name = 'diaweb/naked_registration.html'
-    style = {'template_pack': 'rest_framework/vertical'}
+def registration_view(request, registration_type):
+    template_name = 'diaweb/register.html'
+    style = {'template_pack': 'rest_framework/horizontal'}
     serializer = PatientSerializer
     hidden_fields = ['id', 'confirmed_diabetes', 'classifier_result', 'last_appointment']
     name = 'Patient'

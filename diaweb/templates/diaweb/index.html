@@ -19,8 +19,8 @@
         <div class="page-header">
             <ul id="registration-nav" class="breadcrumb" style="margin-top: 2%">
                 <li class="active"><h1>Register Now >> </h1></li>
-                <li class="active"><a href="{% url 'login' %}">Patient account</a></li>
-                <li class="active"><a href="{% url 'login' %}">Physician account</a></li>
+                <li class="active"><a href="{% url 'register'  registration_type='patient' %}">Patient account</a></li>
+                <li class="active"><a href="{% url 'register'  registration_type='physician' %}">Physician account</a></li>
             </ul>
         </div>
         {% if welcome_msg %}
