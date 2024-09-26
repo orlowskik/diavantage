@@ -24,7 +24,8 @@ from rest_framework import routers
 
 from diaweb.views import PatientViewSet, PhysicianViewSet, AddressViewSet, GlucoseViewSet, BloodViewSet, \
     AppointmentViewSet, ReceptionViewSet, LoginPageView, \
-    BasicPageView, naked_login_view, registration_view, PatientWebViewSet, PhysicianWebViewSet
+    BasicPageView, naked_login_view, registration_view, PatientWebViewSet, PhysicianWebViewSet, MainPageView, \
+    UserViewSet
 
 router = routers.DefaultRouter()
 router.register(r'patients', PatientViewSet)
@@ -34,9 +35,10 @@ router.register(r'glucose', GlucoseViewSet)
 router.register(r'bloods', BloodViewSet)
 router.register(r'appointments', AppointmentViewSet)
 router.register(r'receptions', ReceptionViewSet)
+router.register(r'users', UserViewSet)
 
 
-web_router = routers.DefaultRouter()
+web_router = routers.SimpleRouter()
 web_router.register(r'patients', PatientWebViewSet, basename='web-patient')
 web_router.register(r'physicians', PhysicianWebViewSet, basename='web-physician')
 
@@ -49,8 +51,7 @@ urlpatterns = [
 
 
     path('', BasicPageView.as_view(), name='index'),
-    path('login/', LoginPageView.as_view(), name='login'),
-    path('naked_login/', naked_login_view, name='naked_login'),
+    path('web/' , MainPageView.as_view() , name='main'),
     path('register/<registration_type>/' , registration_view , name='register'),
 ] + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
 

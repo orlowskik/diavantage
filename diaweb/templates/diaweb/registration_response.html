@@ -1,11 +1,7 @@
 {% extends 'rest_framework/base.html' %}
 
-{% block head %}
-    {% load static %}
-    {% load rest_framework %}
-    {{ block.super }}
-    <script src="{% static 'diaweb/registration_scripts.js' %}"></script>
-{% endblock %}
+{% load static %}
+{% load rest_framework %}
 
 {% block title %}
     DiaVantage
@@ -62,7 +58,7 @@
         {% endif %}
 {% endblock %}
 
-{% block scripts %}
+{% block script %}
     {{ block.super }}
     <script type="text/javascript">
       document.getElementsByName('user.password')[0].type = 'password';

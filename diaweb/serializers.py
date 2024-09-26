@@ -33,6 +33,30 @@ class PatientSerializer(serializers.ModelSerializer):
         patient = Patient.objects.create(user=user, address=address, **validated_data)
         return patient
 
+    def update(self, instance, validated_data):
+        if validated_data.get('address', None) is not None:
+            address_data = validated_data.pop('address')
+            if instance.address is None:
+                address = Address.objects.create(**address_data)
+                instance.address = address
+            else:
+                address_serializer = AddressSerializer(instance.address, data=address_data, partial=True)
+                if address_serializer.is_valid(raise_exception=True):
+                    address_serializer.save()
+
+        if validated_data.get('user', None) is not None:
+            user_data = validated_data.pop('user')
+            user_serializer = UserSerializer(instance.user, data=user_data, partial=True)
+            if user_serializer.is_valid(raise_exception=True):
+                user_serializer.save()
+
+        for key, value in validated_data.items():
+            setattr(instance, key, value)
+
+        instance.save()
+
+        return instance
+
 
 class PhysicianSerializer(serializers.ModelSerializer):
     user = UserSerializer()
@@ -43,6 +67,7 @@ class PhysicianSerializer(serializers.ModelSerializer):
         exclude = ('patient',)
 
     def create(self, validated_data):
+        print('Creating')
         user_data = validated_data.pop('user')
         user = User.objects.create_user(**user_data)
         if validated_data.get('address') is not None:
@@ -52,6 +77,31 @@ class PhysicianSerializer(serializers.ModelSerializer):
         else:
             physician = Physician.objects.create(user=user, **validated_data)
         return physician
+
+    def update(self, instance, validated_data):
+        if validated_data.get('address', None) is not None:
+            address_data = validated_data.pop('address')
+            if instance.address is None:
+                address = Address.objects.create(**address_data)
+                instance.address = address
+            else:
+                address_serializer = AddressSerializer(instance.address, data=address_data, partial=True)
+                if address_serializer.is_valid(raise_exception=True):
+                    address_serializer.save()
+
+        if validated_data.get('user', None) is not None:
+            user_data = validated_data.pop('user')
+            user_serializer = UserSerializer(instance.user, data=user_data, partial=True)
+            if user_serializer.is_valid(raise_exception=True):
+                user_serializer.save()
+
+        for key, value in validated_data.items():
+            setattr(instance, key, value)
+
+        instance.save()
+
+        return instance
+
 
 class GlucoseSerializer(serializers.ModelSerializer):
     patient = PrimaryKeyRelatedField(queryset=Patient.objects.all())
