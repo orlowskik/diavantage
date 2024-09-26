@@ -1,0 +1,67 @@
+{% extends 'rest_framework/base.html' %}
+
+{% load rest_framework %}
+
+{% block title %}
+    DiaVantage
+{% endblock %}
+
+{% block branding %}
+    <a class="navbar-brand" href="{% url 'index' %}">DiaVantage</a>
+{% endblock %}
+
+{% block userlinks %}
+    {% if request.user.is_authenticated %}
+        {% optional_logout request request.user csrf_token %}
+    {% endif %}
+{% endblock %}
+
+{%  block breadcrumbs %}
+    <ul class="breadcrumb">
+        <li class="active"><a href="{% url 'main' %}">Main</a></li>
+        <li class="active"><a href="">account-info</a></li>
+    </ul>
+{% endblock %}
+
+
+{% block content %}
+        
+        <div class="content-main" role="main" aria-label="content-main">
+            <div class="page-header" style="margin-bottom: 2%">
+                <ul id="registration-nav" class="breadcrumb" style="margin-top: 2%">
+                    <li class="active"><h1>Account Data</h1></li>
+                </ul>
+            </div>
+            <div class="response-info" aria-label="response-info">
+                <pre class="prettyprint">{{ result | linebreaks }}</pre>
+            </div>
+        </div>
+
+        <div class="tabbable">
+            <div class="well tab-content">
+                <div class="tab-pane active" id="post-object-form">
+                    <form action="" data-method="PATCH" enctype="multipart/form-data" class="form-horizontal" novalidate>
+                        <fieldset>
+                            {% csrf_token %}
+                            {% for field in serializer %}
+                                {% if field.name not in hidden_fields  %}
+                                    {% render_field  field style=style %}
+                                {% endif %}
+                            {% endfor %}
+                            <div class="form-actions">
+                                <button class="btn btn-primary js-tooltip" title >Update</button>
+                            </div>
+                        </fieldset>
+                    </form>
+                </div>
+            </div>
+        </div>
+{% endblock %}
+
+{% block script %}
+    {{ block.super }}
+    <script>
+        document.getElementsByName('user.password')[0].type = 'password';
+        document.getElementById('logoutForm').setAttribute('action', "{% url 'rest_framework:logout' %}?next={% url 'index' %}")
+    </script>
+{% endblock %}

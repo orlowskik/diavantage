@@ -1,0 +1,62 @@
+{% extends 'rest_framework/base.html' %}
+
+
+{% block title %}
+    DiaVantage
+{% endblock %}
+
+{% block branding %}
+    <a class="navbar-brand" href="{% url 'index' %}">DiaVantage</a>
+{% endblock %}
+
+{%  block breadcrumbs %}
+    <ul class="breadcrumb">
+        <li class="active"><a href="{% url 'main' %}">Main</a></li>
+    </ul>
+{% endblock %}
+
+{% block content %}
+    <div class="content-main">
+        <div class="page-header">
+            <ul id="registration-nav" class="breadcrumb" style="margin-top: 2%">
+                <li class="active"><h1>Main Page</h1></li>
+            </ul>
+        </div>
+        <div class="menu-wrapper well" aria-label="menu-wrapper" style="margin-top: 2%">
+            
+            <div class="list-group">
+                <fieldset>
+                    <legend><h3>Welcome {{ user.username }} to DiaVantage</h3></legend>
+                    {% if user.physician %}
+                        <a href="{% url 'web-physician-detail' pk=user.physician.pk %}" class="list-group-item">
+                            <h4 class="list-group-item-heading">My account</h4>
+                            <p class="list-group-item-text">View your account information</p>
+                        </a>
+                        <a href="{% url 'main' %}" class="list-group-item">
+                            <h4 class="list-group-item-heading">My patients</h4>
+                            <p class="list-group-item-text">View your patients list</p>
+                        </a>
+                    {% elif user.patient %}
+                        <a href="{% url 'web-patient-detail' pk=user.patient.pk %}" class="list-group-item">
+                            <h4 class="list-group-item-heading">My account</h4>
+                            <p class="list-group-item-text">View your account information</p>
+                        </a>
+                        <a href="{% url 'main'  %}" class="list-group-item">
+                            <h4 class="list-group-item-heading">My data</h4>
+                            <p class="list-group-item-text">View your health information</p>
+                        </a>
+                    {% endif %}
+                    <a href="{% url 'main'  %}" class="list-group-item">
+                        <h4 class="list-group-item-heading">Physicians</h4>
+                        <p class="list-group-item-text">View registered physicians</p>
+                    </a>
+                    <a href="{% url 'main'  %}" class="list-group-item">
+                        <h4 class="list-group-item-heading">My appointments</h4>
+                        <p class="list-group-item-text">View your calendar</p>
+                    </a>
+                </fieldset>
+            </div>
+        </div>         
+    </div>
+{% endblock %}
+

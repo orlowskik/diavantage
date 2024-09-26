@@ -1,11 +1,18 @@
 {% extends 'rest_framework/base.html' %}
 
+
+{% load rest_framework %}
+
 {% block title %}
     DiaVantage
 {% endblock %}
 
 {% block branding %}
     <a class="navbar-brand" href="{% url 'index' %}">DiaVantage</a>
+{% endblock %}
+
+{% block userlinks %}
+    <li><a href="{% url 'rest_framework:login' %}?next={% url 'main' %}">Login</a></li>
 {% endblock %}
 
 {%  block breadcrumbs %}
