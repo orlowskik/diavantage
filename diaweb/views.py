@@ -1,6 +1,7 @@
 import json
 import os
 from abc import ABCMeta, abstractmethod
+from http import HTTPMethod
 
 from django.conf import settings
 from django.contrib.auth.models import User
@@ -78,7 +79,7 @@ class WebUserViewSet(viewsets.ModelViewSet, metaclass=ABCMeta):
     authentication_classes = [SessionAuthentication, BasicAuthentication]
     permission_classes = [IsAuthenticated]
     style = {'template_pack': 'rest_framework/horizontal'}
-    hidden_fields = ['id']
+    hidden_fields = ['id', 'password']
 
 
     @property
@@ -106,9 +107,8 @@ class WebUserViewSet(viewsets.ModelViewSet, metaclass=ABCMeta):
     def retrieve(self, request, *args, **kwargs):
         response =  super().retrieve(request, *args, **kwargs)
         response.template_name = 'diaweb/detail.html'
-        response.data['serializer'] = self.get_serializer()
-        response.data['result'] = json.dumps(self.get_serializer(self.get_queryset().get(pk=kwargs['pk'])).data,
-                                             indent=4)
+        response.data['name'] = self.get_queryset().first().__class__.__name__
+        response.data['result'] = self.get_queryset().get(pk=kwargs['pk'])
         return response
 
 
@@ -147,15 +147,21 @@ class WebUserViewSet(viewsets.ModelViewSet, metaclass=ABCMeta):
             return_status = status.HTTP_400_BAD_REQUEST
 
         return Response(data={"result": result, 'status': return_status,
-                              'target': self.update_target, 'serializer': self.get_serializer(),
+                              'serializer': self.get_serializer(),
                               'style': self.style, 'hidden_fields': self.hidden_fields},
                         status=return_status, template_name='diaweb/account_detail.html')
 
-    @action(detail=True, methods=['get'])
+    @action(detail=True, methods=[HTTPMethod.GET, HTTPMethod.PATCH])
     def account_detail(self, request, pk, *args, **kwargs):
         kwargs['pk'] = pk
-        response = self.retrieve(request, *args, **kwargs)
+        if request.method == 'PATCH':
+            response = self.partial_update(request, *args, **kwargs)
+        else:
+            response = self.retrieve(request, *args, **kwargs)
+
         response.template_name = 'diaweb/account_detail.html'
+        response.data['result'] = json.dumps(self.get_serializer(self.get_queryset().get(pk=kwargs['pk'])).data, indent=4)
+        response.data['serializer'] = self.get_serializer()
         response.data['style'] = self.style
         response.data['hidden_fields'] = self.hidden_fields
         response.data['target'] = self.create_target

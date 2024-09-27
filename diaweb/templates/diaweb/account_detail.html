@@ -30,6 +30,7 @@
             <div class="page-header" style="margin-bottom: 2%">
                 <ul id="registration-nav" class="breadcrumb" style="margin-top: 2%">
                     <li class="active"><h1>Account Data</h1></li>
+                    <li class="active navbar-btn"><button onclick="history.back()">Return</button></li>
                 </ul>
             </div>
             <div class="response-info" aria-label="response-info">
@@ -41,11 +42,11 @@
             <div class="well tab-content">
                 <div class="tab-pane active" id="post-object-form">
                     {% if request.user.patient %}
-                    <form action="{% url 'web-patient-detail' pk=user.patient.pk %}" data-method="PATCH" enctype="multipart/form-data" class="form-horizontal" novalidate>
+                    <form action=""  data-method="PATCH" enctype="multipart/form-data" class="form-horizontal" novalidate>
                     {% elif request.user.physician %}
-                    <form action="{% url 'web-physician-detail' pk=user.physician.pk %}" data-method="PATCH" enctype="multipart/form-data" class="form-horizontal" novalidate>
+                    <form action=""  data-method="PATCH" enctype="multipart/form-data" class="form-horizontal" novalidate>
                     {% else %}
-                    <form action="" data-method="PATCH" enctype="multipart/form-data" class="form-horizontal" novalidate>
+                    <form action="" target='blank_action' data-method="PATCH" enctype="multipart/form-data" class="form-horizontal" novalidate>
                     {% endif %}
                         <fieldset>
                             {% csrf_token %}
@@ -55,19 +56,24 @@
                                 {% endif %}
                             {% endfor %}
                             <div class="form-actions">
-                                <button class="btn btn-primary js-tooltip" title >Update</button>
+                                <button class="btn btn-primary js-tooltip">Update</button>
                             </div>
                         </fieldset>
                     </form>
+                    <div class="form-actions">
+                         <button class="btn btn-primary js-tooltip" style="margin-top: 1%" onclick="">Change Password</button>
+                    </div>
+                   
                 </div>
             </div>
         </div>
+        <iframe name="blank_action" id="blank_action"></iframe>
 {% endblock %}
 
 {% block script %}
     {{ block.super }}
     <script>
-        document.getElementsByName('user.password')[0].type = 'password';
+        document.getElementsByName('user.password')[0].disabled = true;
         document.getElementById('logoutForm').setAttribute('action', "{% url 'rest_framework:logout' %}?next={% url 'index' %}")
     </script>
 {% endblock %}

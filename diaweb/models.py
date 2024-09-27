@@ -1,3 +1,4 @@
+import json
 from datetime import date, datetime
 
 from django.db import models, IntegrityError
@@ -18,6 +19,22 @@ class Address(models.Model):
     street    = models.CharField(max_length=100)
     number    = models.CharField(max_length=10)
     apartment = models.CharField(max_length=10, null=True, blank=True)
+
+    def __str__(self):
+        return f'{self.street} {self.number}'
+
+    def get_details(self):
+        data = {
+            'country': self.country,
+            'state': self.state,
+            'city': self.city,
+            'zip_code': self.zip_code,
+            'street' : self.street,
+            'number' : self.number,
+            'apartment' : self.apartment,
+        }
+
+        return data
 
 
 class Patient(models.Model):
@@ -51,6 +68,21 @@ class Patient(models.Model):
     def get_prediction(self):
         return self.PREDICTIONS[self.classifier_result]
 
+    def get_details(self):
+        data = {
+            'name' : f'{self.user.first_name} {self.user.last_name}',
+            'email' : self.user.email,
+            'birthdate' : self.birthdate.strftime('%d-%m-%Y'),
+            'age'  : self.get_age(),
+            'sex'  : self.sex,
+            'address' : self.address.get_details() if self.address else None,
+            'diabetes' : self.confirmed_diabetes,
+            'prediction' : self.get_prediction(),
+            'last_appointment' : self.last_appointment
+        }
+
+        return json.dumps(data, indent=4)
+
     def save(self, **kwargs):
         if self.birthdate > timezone.now().date():
             raise ValidationError('Future date restricted')
@@ -68,6 +100,17 @@ class Physician(models.Model):
 
     def __str__(self):
         return f'{self.user.first_name} {self.user.last_name} - {self.specialty}'
+
+    def get_details(self):
+        data = {
+            'name' : self.__str__(),
+            'email' : self.user.email,
+            'phone' : self.phone,
+            'address' : self.address.get_details() if self.address else None,
+
+        }
+
+        return json.dumps(data, indent=4)
 
     def save(self, **kwargs):
         if Patient.objects.filter(user=self.user).exists():

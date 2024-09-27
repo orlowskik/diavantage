@@ -1,0 +1,68 @@
+{% extends 'rest_framework/base.html' %}
+
+{% load rest_framework %}
+
+{% block title %}
+    DiaVantage
+{% endblock %}
+
+{% block branding %}
+    <a class="navbar-brand" href="{% url 'index' %}">DiaVantage</a>
+{% endblock %}
+
+{% block userlinks %}
+    {% if request.user.is_authenticated %}
+        {% optional_logout request request.user csrf_token %}
+    {% endif %}
+{% endblock %}
+
+{%  block breadcrumbs %}
+    <ul class="breadcrumb">
+        <li class="active"><a href="{% url 'main' %}">Main</a></li>
+        {% if data.name == 'Patient' %}
+            <li class="active"><a href="{% url 'web-patient-list' %}">{{ data.name }} List</a></li>
+        {% else %}
+            <li class="active"><a href="{% url 'web-physician-list' %}">{{ data.name }} List</a></li>
+        {% endif %}
+        <li class="active"><a href="">{{ data.name }} Detail</a></li>
+    </ul>
+{% endblock %}
+
+
+{% block content %}
+        
+        <div class="content-main" role="main" aria-label="content-main">
+            <div class="page-header" style="margin-bottom: 2%">
+                <ul id="registration-nav" class="breadcrumb" style="margin-top: 2%">
+                    <li class="active"><h1>{{ data.result }}</h1></li>
+                    <li class="active navbar-btn"><button onclick="history.back()">Return</button></li>
+                </ul>
+                
+            </div>
+            <div class="response-info" aria-label="response-info">
+                <pre class="prettyprint">{{ data.result.get_details | linebreaks }}</pre>
+            </div>
+        </div>
+
+        <div class="tabbable">
+                
+                    <a class="navbar-brand"  href="javascript:history.back()">Return</a>
+                    <ul class="nav navbar-nav pull-right">
+                    {% if data.name == 'Patient' %}
+                        <li class="navbar-btn"><button class="btn btn-primary js-tooltip" >Change Diabetes Status</button></li>
+                        <li class="navbar-btn"><button class="btn btn-primary js-tooltip" >Measurements Data Analysis</button></li>
+                        
+                    {% endif %}
+                    </ul>
+                
+            </div>
+        </div>
+        
+{% endblock %}
+
+{% block script %}
+    {{ block.super }}
+    <script>
+        document.getElementById('logoutForm').setAttribute('action', "{% url 'rest_framework:logout' %}?next={% url 'index' %}")
+    </script>
+{% endblock %}
