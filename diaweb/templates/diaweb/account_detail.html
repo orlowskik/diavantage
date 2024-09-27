@@ -33,19 +33,25 @@
                 </ul>
             </div>
             <div class="response-info" aria-label="response-info">
-                <pre class="prettyprint">{{ result | linebreaks }}</pre>
+                <pre class="prettyprint">{{ data.result | linebreaks }}</pre>
             </div>
         </div>
 
         <div class="tabbable">
             <div class="well tab-content">
                 <div class="tab-pane active" id="post-object-form">
+                    {% if request.user.patient %}
+                    <form action="{% url 'web-patient-detail' pk=user.patient.pk %}" data-method="PATCH" enctype="multipart/form-data" class="form-horizontal" novalidate>
+                    {% elif request.user.physician %}
+                    <form action="{% url 'web-physician-detail' pk=user.physician.pk %}" data-method="PATCH" enctype="multipart/form-data" class="form-horizontal" novalidate>
+                    {% else %}
                     <form action="" data-method="PATCH" enctype="multipart/form-data" class="form-horizontal" novalidate>
+                    {% endif %}
                         <fieldset>
                             {% csrf_token %}
-                            {% for field in serializer %}
-                                {% if field.name not in hidden_fields  %}
-                                    {% render_field  field style=style %}
+                            {% for field in data.serializer %}
+                                {% if field.name not in data.hidden_fields  %}
+                                    {% render_field  field style=data.style %}
                                 {% endif %}
                             {% endfor %}
                             <div class="form-actions">

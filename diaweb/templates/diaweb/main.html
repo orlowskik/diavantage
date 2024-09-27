@@ -28,16 +28,16 @@
                 <fieldset>
                     <legend><h3>Welcome {{ user.username }} to DiaVantage</h3></legend>
                     {% if user.physician %}
-                        <a href="{% url 'web-physician-detail' pk=user.physician.pk %}" class="list-group-item">
+                        <a href="{% url 'web-physician-account-detail' pk=user.physician.pk %}" class="list-group-item">
                             <h4 class="list-group-item-heading">My account</h4>
                             <p class="list-group-item-text">View your account information</p>
                         </a>
-                        <a href="{% url 'main' %}" class="list-group-item">
+                        <a href="{% url 'web-patient-list' %}" class="list-group-item">
                             <h4 class="list-group-item-heading">My patients</h4>
                             <p class="list-group-item-text">View your patients list</p>
                         </a>
                     {% elif user.patient %}
-                        <a href="{% url 'web-patient-detail' pk=user.patient.pk %}" class="list-group-item">
+                        <a href="{% url 'web-patient-account-detail' pk=user.patient.pk %}" class="list-group-item">
                             <h4 class="list-group-item-heading">My account</h4>
                             <p class="list-group-item-text">View your account information</p>
                         </a>
@@ -46,7 +46,7 @@
                             <p class="list-group-item-text">View your health information</p>
                         </a>
                     {% endif %}
-                    <a href="{% url 'main'  %}" class="list-group-item">
+                    <a href="{% url 'web-physician-list'  %}" class="list-group-item">
                         <h4 class="list-group-item-heading">Physicians</h4>
                         <p class="list-group-item-text">View registered physicians</p>
                     </a>

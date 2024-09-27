@@ -23,8 +23,8 @@ from rest_framework import routers
 
 
 from diaweb.views import PatientViewSet, PhysicianViewSet, AddressViewSet, GlucoseViewSet, BloodViewSet, \
-    AppointmentViewSet, ReceptionViewSet, LoginPageView, \
-    BasicPageView, naked_login_view, registration_view, PatientWebViewSet, PhysicianWebViewSet, MainPageView, \
+    AppointmentViewSet, ReceptionViewSet, \
+    BasicPageView, registration_view, PatientWebViewSet, PhysicianWebViewSet, MainPageView, \
     UserViewSet
 
 router = routers.DefaultRouter()
