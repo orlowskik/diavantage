@@ -4,22 +4,22 @@ from abc import ABCMeta, abstractmethod
 
 from django.conf import settings
 from django.contrib.auth.models import User
-from django.http import QueryDict
 
 from django.views.decorators.clickjacking import xframe_options_sameorigin
 from django.views.generic import TemplateView
 from rest_framework import viewsets, status
 from rest_framework.authentication import BasicAuthentication, SessionAuthentication
-from rest_framework.decorators import api_view, renderer_classes
+from rest_framework.decorators import api_view, renderer_classes, action
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.renderers import TemplateHTMLRenderer, JSONRenderer
-from rest_framework.views import APIView
 
 
 from diaweb.models import Patient, Physician, Address, Glucose, Blood, Appointment, Reception
 from diaweb.serializers import PatientSerializer, PhysicianSerializer, AddressSerializer, \
     GlucoseSerializer, BloodSerializer, AppointmentSerializer, ReceptionSerializer, UserSerializer
+
+from diaweb.renderers import WebUserTemplateHTMLRenderer
 
 from diaweb.extra_context import import_extra_context
 
@@ -74,7 +74,7 @@ class ReceptionViewSet(viewsets.ModelViewSet):
 
 
 class WebUserViewSet(viewsets.ModelViewSet, metaclass=ABCMeta):
-    renderer_classes = [JSONRenderer, TemplateHTMLRenderer]
+    renderer_classes = [JSONRenderer, WebUserTemplateHTMLRenderer]
     authentication_classes = [SessionAuthentication, BasicAuthentication]
     permission_classes = [IsAuthenticated]
     style = {'template_pack': 'rest_framework/horizontal'}
@@ -96,12 +96,17 @@ class WebUserViewSet(viewsets.ModelViewSet, metaclass=ABCMeta):
     def serializer_class(self):
         pass
 
+    def list(self, request, *args, **kwargs):
+        response = super().list(request, *args, **kwargs)
+        response.template_name = 'diaweb/list.html'
+        response.data = {'list': response.data,
+                         'name': self.get_queryset().first().__class__.__name__}
+        return response
+
     def retrieve(self, request, *args, **kwargs):
         response =  super().retrieve(request, *args, **kwargs)
-        response.template_name = 'diaweb/account_detail.html'
+        response.template_name = 'diaweb/detail.html'
         response.data['serializer'] = self.get_serializer()
-        response.data['style'] = self.style
-        response.data['hidden_fields'] = self.hidden_fields
         response.data['result'] = json.dumps(self.get_serializer(self.get_queryset().get(pk=kwargs['pk'])).data,
                                              indent=4)
         return response
@@ -142,10 +147,20 @@ class WebUserViewSet(viewsets.ModelViewSet, metaclass=ABCMeta):
             return_status = status.HTTP_400_BAD_REQUEST
 
         return Response(data={"result": result, 'status': return_status,
-                              'target': self.create_target, 'serializer': self.get_serializer(),
+                              'target': self.update_target, 'serializer': self.get_serializer(),
                               'style': self.style, 'hidden_fields': self.hidden_fields},
                         status=return_status, template_name='diaweb/account_detail.html')
 
+    @action(detail=True, methods=['get'])
+    def account_detail(self, request, pk, *args, **kwargs):
+        kwargs['pk'] = pk
+        response = self.retrieve(request, *args, **kwargs)
+        response.template_name = 'diaweb/account_detail.html'
+        response.data['style'] = self.style
+        response.data['hidden_fields'] = self.hidden_fields
+        response.data['target'] = self.create_target
+
+        return response
 
 class PatientWebViewSet(WebUserViewSet):
     queryset = Patient.objects.all()
@@ -157,9 +172,6 @@ class PhysicianWebViewSet(WebUserViewSet):
     queryset = Physician.objects.all()
     serializer_class = PhysicianSerializer
     create_target = 'web-physician-list'
-
-class LoginPageView(TemplateView):
-    template_name = 'diaweb/login_base.html'
 
 @xframe_options_sameorigin
 @api_view(['GET'])

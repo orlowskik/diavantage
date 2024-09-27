@@ -1,0 +1,49 @@
+{% extends 'rest_framework/base.html' %}
+
+{% block title %}
+    DiaVantage
+{% endblock %}
+
+{% block branding %}
+    <a class="navbar-brand" href="{% url 'index' %}">DiaVantage</a>
+{% endblock %}
+
+{%  block breadcrumbs %}
+    <ul class="breadcrumb">
+        <li class="active"><a href="{% url 'main' %}">Main</a></li>
+        <li class="active"><a href="">{{ data.name }} List</a></li>
+    </ul>
+{% endblock %}
+
+
+{% block content %}
+    <div class="content-main">
+        <div class="page-header">
+            <ul id="registration-nav" class="breadcrumb" style="margin-top: 2%">
+                <li class="active"><h1>{{ data.name }} List</h1></li>
+            </ul>
+        </div>
+    </div>
+    <div class="menu-wrapper well" aria-label="menu-wrapper" style="margin-top: 2%">
+        <div class="list-group">
+            <fieldset>
+                {% for item in data.list %}
+                    {% if data.name == 'Patient' %}
+                        <a class="list-group-item" href="{% url 'web-patient-detail' pk=item.id %}">
+                            <h3 class="list-group-item-heading"> {{ item.user.first_name }} {{ item.user.last_name }}</h3>
+                            <p class="list-group-item-text">{{ item.user.email }}</p>
+                            <p class="list-group-item-text">Birthdate: {{ item.birthdate }}</p>
+                        </a>
+                    {% else %}
+                        <a class="list-group-item" href="{% url 'web-physician-detail' pk=item.id %}">
+                            <h3 class="list-group-item-heading"> {{ item.user.first_name }} {{ item.user.last_name }}</h3>
+                            <p class="list-group-item-text">Specialty: {{ item.specialty }}</p>
+                            <p class="list-group-item-text">Email:{{ item.user.email }}</p>
+                            <p class="list-group-item-text">Phone: {{ item.phone }}</p>
+                        </a>
+                    {% endif %}
+                {% endfor %}
+            </fieldset>
+        </div>
+    </div>
+{% endblock %}
