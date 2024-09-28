@@ -51,5 +51,5 @@
 
 {% block script %}
     {{ block.super }}
-            document.getElementById('logoutForm').setAttribute('action', "{% url 'rest_framework:logout' %}?next={% url 'index' %}")
+            <script>document.getElementById('logoutForm').setAttribute('action', "{% url 'rest_framework:logout' %}?next={% url 'index' %}")</script>
 {% endblock %}
