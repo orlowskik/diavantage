@@ -1,6 +1,7 @@
 {% extends 'rest_framework/base.html' %}
 
 {% load rest_framework %}
+{% load plotly_dash %}
 
 {% block title %}
     DiaVantage
@@ -34,28 +35,24 @@
         <div class="content-main" role="main" aria-label="content-main">
             <div class="page-header" style="margin-bottom: 2%">
                 <ul id="registration-nav" class="breadcrumb" style="margin-top: 2%">
-                    <li class="active"><h1>{{ data.result }}</h1></li>
+                    <li class="active"><h1>Patient Measures</h1></li>
                     <li class="active navbar-btn"><button onclick="history.back()">Return</button></li>
                 </ul>
                 
             </div>
-            <div class="response-info" aria-label="response-info">
-                <pre class="prettyprint">{{ data.result.get_details | linebreaks }}</pre>
+            <div class="container-fluid" >
+                <div class="well">
+                    {% plotly_app name="SimpleExample" ratio=1 %}
+                </div>
+
             </div>
         </div>
 
         <div class="tabbable">
                 
                     <a class="navbar-brand"  href="javascript:history.back()">Return</a>
-                    <ul class="nav navbar-nav pull-right">
-                    {% if data.name == 'Patient' %}
-                        <li class="navbar-btn"><button class="btn btn-primary js-tooltip" >Change Diabetes Status</button></li>
-                        <li class="navbar-btn"><a href="{% url 'web-patient-measurements' pk=1 %}"><button class="btn btn-primary js-tooltip">Measurements Data Analysis</button></a></li>
-                        
-                    {% endif %}
-                    </ul>
                 
-
+            
         </div>
         
 {% endblock %}
