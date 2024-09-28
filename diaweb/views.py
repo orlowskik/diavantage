@@ -7,12 +7,10 @@ from django.conf import settings
 from django.contrib.auth.models import User
 from django.contrib.auth.mixins import LoginRequiredMixin
 
-from django.views.decorators.clickjacking import xframe_options_sameorigin
 from django.views.generic import TemplateView
 from rest_framework import viewsets, status
 from rest_framework.authentication import BasicAuthentication, SessionAuthentication
 from rest_framework.decorators import api_view, renderer_classes, action
-from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.renderers import TemplateHTMLRenderer, JSONRenderer
 
@@ -23,6 +21,8 @@ from diaweb.serializers import PatientSerializer, PhysicianSerializer, AddressSe
 from diaweb.renderers import WebUserTemplateHTMLRenderer
 from diaweb.authentication import IsAuthenticatedPostLeak
 from diaweb.extra_context import import_extra_context
+
+from diaweb import graphs
 
 
 class BasicPageView(TemplateView):
@@ -37,7 +37,6 @@ class BasicPageView(TemplateView):
 class MainPageView(LoginRequiredMixin, TemplateView):
     template_name = "diaweb/main.html"
     login_url = settings.LOGIN_URL
-
 
 
 class UserViewSet(viewsets.ModelViewSet):
@@ -183,6 +182,14 @@ class PatientWebViewSet(WebUserViewSet):
     hidden_fields = ['id', 'confirmed_diabetes', 'classifier_result', 'last_appointment']
     create_target = 'web-patient-list'
 
+    @action(detail=True, methods=[HTTPMethod.GET])
+    def measurements(self, request, pk=None, *args, **kwargs):
+        if pk is None:
+            raise IndexError('Patient ID required')
+        patient = self.get_queryset().get(pk=pk)
+
+        return Response(template_name='diaweb/measurements.html')
+
 
 class PhysicianWebViewSet(WebUserViewSet):
     queryset = Physician.objects.all()
@@ -190,14 +197,6 @@ class PhysicianWebViewSet(WebUserViewSet):
     create_target = 'web-physician-list'
 
 
-@xframe_options_sameorigin
-@api_view(['GET'])
-@renderer_classes([TemplateHTMLRenderer])
-def naked_login_view(request):
-    return Response(template_name='diaweb/login.html')
-
-
-@xframe_options_sameorigin
 @api_view(['GET'])
 @renderer_classes([TemplateHTMLRenderer])
 def registration_view(request, registration_type):

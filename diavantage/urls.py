@@ -48,6 +48,7 @@ urlpatterns = [
     path('api/', include(router.urls)),
     path('web/', include(web_router.urls)),
     path('api-auth/', include('rest_framework.urls', namespace='rest_framework')),
+    path('django_plotly_dash/', include('django_plotly_dash.urls', namespace='django_plotly_dash')),
 
 
     path('', BasicPageView.as_view(), name='index'),
