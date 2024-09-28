@@ -48,3 +48,8 @@
         </div>
     </div>
 {% endblock %}
+
+{% block script %}
+    {{ block.super }}
+            document.getElementById('logoutForm').setAttribute('action', "{% url 'rest_framework:logout' %}?next={% url 'index' %}")
+{% endblock %}
