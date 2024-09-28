@@ -5,6 +5,7 @@ from http import HTTPMethod
 
 from django.conf import settings
 from django.contrib.auth.models import User
+from django.contrib.auth.mixins import LoginRequiredMixin
 
 from django.views.decorators.clickjacking import xframe_options_sameorigin
 from django.views.generic import TemplateView
@@ -20,7 +21,7 @@ from diaweb.serializers import PatientSerializer, PhysicianSerializer, AddressSe
     GlucoseSerializer, BloodSerializer, AppointmentSerializer, ReceptionSerializer, UserSerializer
 
 from diaweb.renderers import WebUserTemplateHTMLRenderer
-
+from diaweb.authentication import IsAuthenticatedPostLeak
 from diaweb.extra_context import import_extra_context
 
 
@@ -33,8 +34,10 @@ class BasicPageView(TemplateView):
         return context
 
 
-class MainPageView(TemplateView):
+class MainPageView(LoginRequiredMixin, TemplateView):
     template_name = "diaweb/main.html"
+    login_url = settings.LOGIN_URL
+
 
 
 class UserViewSet(viewsets.ModelViewSet):
@@ -80,8 +83,8 @@ class ReceptionViewSet(viewsets.ModelViewSet):
 
 class WebUserViewSet(viewsets.ModelViewSet, metaclass=ABCMeta):
     renderer_classes = [JSONRenderer, WebUserTemplateHTMLRenderer]
-    # authentication_classes = [SessionAuthentication, BasicAuthentication]
-    # permission_classes = [IsAuthenticated]
+    authentication_classes = [SessionAuthentication, BasicAuthentication]
+    permission_classes = [IsAuthenticatedPostLeak]
     style = {'template_pack': 'rest_framework/horizontal'}
     hidden_fields = ['id']
 
@@ -116,7 +119,6 @@ class WebUserViewSet(viewsets.ModelViewSet, metaclass=ABCMeta):
 
     def create(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
-
 
         if serializer.is_valid():
             instance = serializer.save()
