@@ -1,39 +1,31 @@
 import dash
+import pandas as pd
+import plotly.express as px
 from dash import dcc, html
 
 from django_plotly_dash import DjangoDash
 
+from diaweb.models import Glucose, Blood
+
 app = DjangoDash('SimpleExample')
 
-app.layout = html.Div([
-    dcc.RadioItems(
-        id='dropdown-color',
-        options=[{'label': c, 'value': c.lower()} for c in ['Red', 'Green', 'Blue']],
-        value='red'
-    ),
-    html.Div(id='output-color'),
-    dcc.RadioItems(
-        id='dropdown-size',
-        options=[{'label': i,
-                  'value': j} for i, j in [('L', 'large'), ('M', 'medium'), ('S', 'small')]],
-        value='medium'
-    ),
-    html.Div(id='output-size')
+app.layout = lambda: html.Div(children=[
+    html.Div(id='dummy'),
+    html.H2(children='Hello world'),
+    html.Div(id='test',),
+    dcc.Graph(id='Example')
 
 ])
 
 
 @app.callback(
-    dash.dependencies.Output('output-color', 'children'),
-    [dash.dependencies.Input('dropdown-color', 'value')])
-def callback_color(dropdown_value):
-    return "The selected color is %s." % dropdown_value
+    dash.dependencies.Output('Example', 'figure'),
+    [dash.dependencies.Input('dummy', 'children')]
+)
+def update_graph(*args, **kwargs):
+    patient_id = kwargs['request'].session['patient_id']
+    data = Glucose.objects.filter(patient_id=patient_id).values('measurement', 'measurement_type', 'measurement_date')
+    df = pd.DataFrame(data)
 
-
-@app.callback(
-    dash.dependencies.Output('output-size', 'children'),
-    [dash.dependencies.Input('dropdown-color', 'value'),
-     dash.dependencies.Input('dropdown-size', 'value')])
-def callback_size(dropdown_color, dropdown_size):
-    return "The chosen T-shirt is a %s %s one." % (dropdown_size,
-                                                   dropdown_color)
+    figure = px.line(df, x='measurement_date', y='measurement', color='measurement_type')
+    return figure

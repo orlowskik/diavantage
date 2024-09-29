@@ -1,5 +1,8 @@
 import json
 import os
+import pandas as pd
+import plotly.express as px
+
 from abc import ABCMeta, abstractmethod
 from http import HTTPMethod
 
@@ -186,9 +189,10 @@ class PatientWebViewSet(WebUserViewSet):
     def measurements(self, request, pk=None, *args, **kwargs):
         if pk is None:
             raise IndexError('Patient ID required')
-        patient = self.get_queryset().get(pk=pk)
 
-        return Response(template_name='diaweb/measurements.html')
+        request.session['patient_id'] = pk
+
+        return Response(template_name='diaweb/measurements.html', status=status.HTTP_200_OK)
 
 
 class PhysicianWebViewSet(WebUserViewSet):
