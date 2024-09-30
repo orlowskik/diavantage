@@ -117,6 +117,7 @@ class WebUserViewSet(viewsets.ModelViewSet, metaclass=ABCMeta):
         response.template_name = 'diaweb/detail.html'
         response.data['name'] = self.get_queryset().first().__class__.__name__
         response.data['result'] = self.get_queryset().get(pk=kwargs['pk'])
+        response.data['pk'] = kwargs['pk']
         return response
 
     def create(self, request, *args, **kwargs):
