@@ -38,36 +38,42 @@
             </div>
         </div>
 
-        <div class="tabbable">
-            <div class="well tab-content">
-                <div class="tab-pane active" id="post-object-form">
-                    {% if request.user.patient %}
-                    <form action=""  data-method="PATCH" enctype="multipart/form-data" class="form-horizontal" novalidate>
-                    {% elif request.user.physician %}
-                    <form action=""  data-method="PATCH" enctype="multipart/form-data" class="form-horizontal" novalidate>
-                    {% else %}
-                    <form action="" target='blank_action' data-method="PATCH" enctype="multipart/form-data" class="form-horizontal" novalidate>
-                    {% endif %}
-                        <fieldset>
-                            {% csrf_token %}
-                            {% for field in data.serializer %}
-                                {% if field.name not in data.hidden_fields  %}
-                                    {% render_field  field style=data.style %}
-                                {% endif %}
-                            {% endfor %}
-                            <div class="form-actions">
-                                <button class="btn btn-primary js-tooltip">Update</button>
-                            </div>
-                        </fieldset>
-                    </form>
-                    <div class="form-actions">
-                         <button class="btn btn-primary js-tooltip" style="margin-top: 1%" onclick="">Change Password</button>
+        {% if data.creation_view %}
+            <div class="tabbable">
+                <a class="navbar-brand"  href="javascript:history.back()">Return to form</a>
+            </div>
+
+        {% else %}
+            <div class="tabbable">
+                <div class="well tab-content">
+                    <div class="tab-pane active" id="post-object-form">
+                        {% if request.user.patient %}
+                        <form action=""  data-method="PATCH" enctype="multipart/form-data" class="form-horizontal" novalidate>
+                        {% elif request.user.physician %}
+                        <form action=""  data-method="PATCH" enctype="multipart/form-data" class="form-horizontal" novalidate>
+                        {% else %}
+                        <form action="" target='blank_action' data-method="PATCH" enctype="multipart/form-data" class="form-horizontal" novalidate>
+                        {% endif %}
+                            <fieldset>
+                                {% csrf_token %}
+                                {% for field in data.serializer %}
+                                    {% if field.name not in data.hidden_fields  %}
+                                        {% render_field  field style=data.style %}
+                                    {% endif %}
+                                {% endfor %}
+                                <div class="form-actions">
+                                    <button class="btn btn-primary js-tooltip">Update</button>
+                                </div>
+                            </fieldset>
+                        </form>
+                        <div class="form-actions">
+                             <button class="btn btn-primary js-tooltip" style="margin-top: 1%" onclick="">Change Password</button>
+                        </div>
+
                     </div>
-                   
                 </div>
             </div>
-        </div>
-        <iframe name="blank_action" id="blank_action"></iframe>
+        {% endif %}
 {% endblock %}
 
 {% block script %}
