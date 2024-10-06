@@ -133,7 +133,8 @@ class WebUserViewSet(viewsets.ModelViewSet, metaclass=ABCMeta):
 
         return Response(data={"result": result, 'status': return_status,
                               'serializer': self.get_serializer(),
-                              'style': self.style, 'hidden_fields': self.hidden_fields},
+                              'style': self.style, 'hidden_fields': self.hidden_fields,
+                              'creation_view': True},
                         status=return_status, template_name='diaweb/account_detail.html')
 
     def partial_update(self, request, *args, **kwargs):
