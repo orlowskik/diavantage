@@ -207,7 +207,7 @@ class PhysicianWebViewSet(WebUserViewSet):
 @renderer_classes([TemplateHTMLRenderer])
 def registration_view(request, registration_type):
     template_name = 'diaweb/register.html'
-    style = {'template_pack': 'rest_framework/horizontal'}
+    style = {'template_pack': 'rest_framework/vertical'}
     serializer = PatientSerializer
     hidden_fields = ['id', 'confirmed_diabetes', 'classifier_result', 'last_appointment']
     name = 'Patient'

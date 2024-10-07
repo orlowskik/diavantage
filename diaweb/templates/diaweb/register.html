@@ -1,13 +1,24 @@
 {% extends 'rest_framework/base.html' %}
-
+{% load static %}
 {% load rest_framework %}
 
 {% block title %}
     DiaVantage
 {% endblock %}
 
+{% block style %}
+    {{ block.super }}
+    <link rel="stylesheet" type="text/css" href="{% static 'diaweb/style.css' %}">
+{% endblock %}
+
 {% block branding %}
     <a class="navbar-brand" href="{% url 'index' %}">DiaVantage</a>
+{% endblock %}
+
+{% block userlinks %}
+    {% if request.user.is_authenticated %}
+        {% optional_logout request request.user csrf_token %}
+    {% endif %}
 {% endblock %}
 
 {%  block breadcrumbs %}
@@ -25,7 +36,8 @@
         <div class="tabbable">
             <div class="well tab-content">
                 <div class="tab-pane active" id="post-object-form">
-                    <form action="{% url target %}" method="post" enctype="multipart/form-data" class="form-horizontal" novalidate>
+                    <form action="{% url target %}" method="post" enctype="multipart/form-data" novalidate>
+                    <div class="">
                         <fieldset>
                             {% csrf_token %}
                             {% for field in serializer %}
@@ -37,6 +49,8 @@
                                 <button type="submit" class="btn btn-primary js-tooltip" title >Sign up</button>
                             </div>
                         </fieldset>
+                    </div>
+                        
                     </form>
                 </div>
             </div>
