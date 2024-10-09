@@ -86,12 +86,8 @@ WSGI_APPLICATION = 'diavantage.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': os.environ.get('PGDATABASE'),
-        'HOST': os.environ.get('PGHOST'),
-        'PORT': os.environ.get('PGPORT'),
-        'USER': os.environ.get('PGUSER'),
-        'PASSWORD': os.environ.get('PGPASSWORD'),
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': BASE_DIR / 'db.sqlite3',
     }
 }
 
@@ -154,4 +150,4 @@ LOGIN_URL = '/api-auth/login/'
 
 X_FRAME_OPTIONS = 'SAMEORIGIN'
 
-CSRF_TRUSTED_ORIGINS=[os.environ.get('CSRF_TRUSTED_ORIGINS')]
+CSRF_TRUSTED_ORIGINS=[os.environ.get('ALLOWED_HOSTS')]
