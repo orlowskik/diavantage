@@ -49,8 +49,15 @@ class UserViewSet(viewsets.ModelViewSet):
 
 # Create your views here
 class PatientViewSet(viewsets.ModelViewSet):
+    authentication_classes = [SessionAuthentication, BasicAuthentication]
     queryset = Patient.objects.all()
     serializer_class = PatientSerializer
+
+    @action(detail=False, methods=[HTTPMethod.GET])
+    def search_patient(self, request):
+        if hasattr(request.user, 'patient'):
+            return Response(status=status.HTTP_200_OK, data={'patient_id': request.user.patient.id})
+        return Response(status=status.HTTP_200_OK, data={'patient_id': None})
 
 
 class PhysicianViewSet(viewsets.ModelViewSet):
@@ -201,7 +208,6 @@ class PhysicianWebViewSet(WebUserViewSet):
     queryset = Physician.objects.all()
     serializer_class = PhysicianSerializer
     create_target = 'web-physician-list'
-
 
 @api_view(['GET'])
 @renderer_classes([TemplateHTMLRenderer])
