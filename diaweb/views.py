@@ -52,6 +52,12 @@ class PatientViewSet(viewsets.ModelViewSet):
     queryset = Patient.objects.all()
     serializer_class = PatientSerializer
 
+    @action(detail=False, methods=[HTTPMethod.GET])
+    def search_patient(self, request):
+        if hasattr(request.user, 'patient'):
+            return Response(status=status.HTTP_200_OK, data={'patient_id': request.user.patient.id})
+        return Response(status=status.HTTP_200_OK, data={'patient_id': None})
+
 
 class PhysicianViewSet(viewsets.ModelViewSet):
     queryset = Physician.objects.all()
