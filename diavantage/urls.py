@@ -25,7 +25,7 @@ from rest_framework import routers
 from diaweb.views import PatientViewSet, PhysicianViewSet, AddressViewSet, GlucoseViewSet, BloodViewSet, \
     AppointmentViewSet, ReceptionViewSet, \
     BasicPageView, registration_view, PatientWebViewSet, PhysicianWebViewSet, MainPageView, \
-    UserViewSet
+    UserViewSet, get_csrf
 
 router = routers.DefaultRouter()
 router.register(r'patients', PatientViewSet)
@@ -54,6 +54,7 @@ urlpatterns = [
     path('', BasicPageView.as_view(), name='index'),
     path('web/' , MainPageView.as_view() , name='main'),
     path('register/<registration_type>/' , registration_view , name='register'),
+    path('get_csrf/' , get_csrf , name='get_csrf'),
 ] + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
 
 

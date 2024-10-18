@@ -9,11 +9,15 @@ from http import HTTPMethod
 from django.conf import settings
 from django.contrib.auth.models import User
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.http import JsonResponse
+from django.middleware import csrf
+from django.views.decorators.csrf import csrf_exempt
 
 from django.views.generic import TemplateView
 from rest_framework import viewsets, status
 from rest_framework.authentication import BasicAuthentication, SessionAuthentication
 from rest_framework.decorators import api_view, renderer_classes, action
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.renderers import TemplateHTMLRenderer, JSONRenderer
 
@@ -26,6 +30,7 @@ from diaweb.authentication import IsAuthenticatedPostLeak
 from diaweb.extra_context import import_extra_context
 
 from diaweb import graphs
+
 
 
 class BasicPageView(TemplateView):
@@ -49,6 +54,8 @@ class UserViewSet(viewsets.ModelViewSet):
 
 # Create your views here
 class PatientViewSet(viewsets.ModelViewSet):
+    authentication_classes = [SessionAuthentication, BasicAuthentication]
+    permission_classes = [IsAuthenticated]
     queryset = Patient.objects.all()
     serializer_class = PatientSerializer
 
@@ -72,6 +79,9 @@ class AddressViewSet(viewsets.ModelViewSet):
 class GlucoseViewSet(viewsets.ModelViewSet):
     queryset = Glucose.objects.all()
     serializer_class = GlucoseSerializer
+    authentication_classes = [SessionAuthentication, BasicAuthentication]
+    permission_classes = [IsAuthenticated]
+
 
 
 class BloodViewSet(viewsets.ModelViewSet):
@@ -229,3 +239,10 @@ def registration_view(request, registration_type):
                      'hidden_fields': hidden_fields, 'name': name,
                      'target': target, 'registration_type': registration_type},
                     template_name=template_name)
+
+
+@csrf_exempt
+def get_csrf(request):
+    token = csrf.get_token(request)
+    response = JsonResponse({'detail': 'CSRF cookie set','CSRFToken': token})
+    return response
