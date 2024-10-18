@@ -217,6 +217,7 @@ class PhysicianWebViewSet(WebUserViewSet):
     serializer_class = PhysicianSerializer
     create_target = 'web-physician-list'
 
+
 @api_view(['GET'])
 @renderer_classes([TemplateHTMLRenderer])
 def registration_view(request, registration_type):
