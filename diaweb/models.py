@@ -4,7 +4,7 @@ from datetime import date, datetime
 from django.db import models, IntegrityError
 from django.contrib.auth.models import User
 from django.utils import timezone
-from django.core.validators import MinValueValidator
+from django.core.validators import MinValueValidator, MaxValueValidator
 from django.core.exceptions import ValidationError
 
 # Create your models here.
@@ -45,7 +45,7 @@ class Patient(models.Model):
     }
 
     user = models.OneToOneField(User, on_delete=models.CASCADE)
-    birthdate = models.DateField()
+    birthdate = models.DateField(validators=[MaxValueValidator(limit_value=date.today)])
     sex = models.CharField(max_length=1, choices=(('M', 'Male'), ('F', 'Female')))
     confirmed_diabetes = models.BooleanField(default=False)
     classifier_result = models.IntegerField(choices=PREDICTIONS, default=0)
@@ -60,7 +60,8 @@ class Patient(models.Model):
         if basis.month > self.birthdate.month:
             return basis.year - self.birthdate.year
         elif basis.month == self.birthdate.month:
-            return basis.year - self.birthdate.year if basis.day >= self.birthdate.day else basis.year - self.birthdate.year - 1
+            return basis.year - self.birthdate.year if basis.day >= self.birthdate.day \
+                else basis.year - self.birthdate.year - 1
         else:
             return basis.year - self.birthdate.year - 1
 
@@ -142,12 +143,6 @@ class Glucose(models.Model):
             models.CheckConstraint(check=models.Q(measurement__gte=0), name='Glucose_positive_number'),
         ]
 
-    def save(self, **kwargs):
-        if isinstance(self.measurement_date, datetime):
-            if self.measurement_date > timezone.now():
-                raise ValidationError('Future date restricted')
-        super().save(**kwargs)
-
 
 class Blood(models.Model):
     patient = models.ForeignKey(Patient, on_delete=models.CASCADE)
@@ -163,12 +158,6 @@ class Blood(models.Model):
                                    name='Diastolic_pressure_positive_number'),
             models.CheckConstraint(check=models.Q(pulse_rate__gte=0), name='Pulse_rate_positive_number'),
         ]
-
-    def save(self, **kwargs):
-        if isinstance(self.measurement_date, datetime):
-            if self.measurement_date > timezone.now():
-                raise ValidationError('Future date restricted')
-        super().save(**kwargs)
 
 
 class Appointment(models.Model):

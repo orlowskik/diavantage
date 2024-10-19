@@ -184,10 +184,9 @@ class WebUserViewSet(viewsets.ModelViewSet, metaclass=ABCMeta):
             response = self.partial_update(request, *args, **kwargs)
         else:
             response = self.retrieve(request, *args, **kwargs)
-
+            response.data['result'] = json.dumps(self.get_serializer(self.get_queryset().get(pk=kwargs['pk'])).data,
+                                                 indent=4)
         response.template_name = 'diaweb/account_detail.html'
-        response.data['result'] = json.dumps(self.get_serializer(self.get_queryset().get(pk=kwargs['pk'])).data,
-                                             indent=4)
         response.data['serializer'] = self.get_serializer()
         response.data['style'] = self.style
         response.data['hidden_fields'] = self.hidden_fields
