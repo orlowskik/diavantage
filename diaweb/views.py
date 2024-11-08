@@ -1,8 +1,6 @@
 import json
 import os
 
-from django.core.serializers import get_serializer
-
 import diaweb.graphs
 
 from abc import ABCMeta, abstractmethod
@@ -23,9 +21,9 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.renderers import TemplateHTMLRenderer, JSONRenderer
 
-from diaweb.models import Patient, Physician, Address, Glucose, Blood, Appointment, Reception
+from diaweb.models import Patient, Physician, Address, Glucose, Blood, Reception
 from diaweb.serializers import PatientSerializer, PhysicianSerializer, AddressSerializer, \
-    GlucoseSerializer, BloodSerializer, AppointmentSerializer, ReceptionSerializer, UserSerializer
+    GlucoseSerializer, BloodSerializer, ReceptionSerializer, UserSerializer
 
 from diaweb.renderers import WebUserTemplateHTMLRenderer
 from diaweb.authentication import IsAuthenticatedPostLeak
@@ -48,12 +46,10 @@ class MainPageView(LoginRequiredMixin, TemplateView):
     login_url = settings.LOGIN_URL
 
 
-class UserViewSet(viewsets.ModelViewSet):
-    queryset = User.objects.all()
-    serializer_class = UserSerializer
+# class UserViewSet(viewsets.ModelViewSet):
+#     queryset = User.objects.all()
+#     serializer_class = UserSerializer
 
-
-# Create your views here
 class PatientViewSet(viewsets.ModelViewSet):
     authentication_classes = [SessionAuthentication, BasicAuthentication]
     permission_classes = [IsAuthenticated]
@@ -73,55 +69,85 @@ class PhysicianViewSet(viewsets.ModelViewSet):
     serializer_class = PhysicianSerializer
 
 
-class AddressViewSet(viewsets.ModelViewSet):
-    queryset = Address.objects.all()
-    serializer_class = AddressSerializer
+# class AddressViewSet(viewsets.ModelViewSet):
+#     queryset = Address.objects.all()
+#     serializer_class = AddressSerializer
 
 
-class GlucoseViewSet(viewsets.ModelViewSet):
-    queryset = Glucose.objects.all()
+class MeasurementViewSet(viewsets.ModelViewSet, metaclass=ABCMeta):
+    authentication_classes = [SessionAuthentication, BasicAuthentication]
+    permission_classes = [IsAuthenticated]
+
+    @property
+    @abstractmethod
+    def serializer_class(self):
+        pass
+
+    @property
+    @abstractmethod
+    def measurement_class(self):
+        pass
+
+    def has_write_permission(self, request):
+        if hasattr(self.request.user, 'patient'):
+            if request.data['patient'] == str(self.request.user.patient.id):
+                return True
+        return False
+
+    def has_destroy_permission(self, request):
+        if hasattr(self.request.user, 'patient'):
+            object_instance = self.get_object()
+            if object_instance.patient == self.request.user.patient:
+                return True
+        return False
+
+    def get_queryset(self):
+        user = self.request.user
+        if hasattr(user, 'patient'):
+            return self.measurement_class.objects.filter(patient=user.patient)
+        if hasattr(user, 'physician'):
+            patients = Patient.objects.filter(physician=user.physician)
+            return self.measurement_class.objects.filter(patient__in=patients)
+        raise PermissionError
+
+    def create(self, request, *args, **kwargs):
+        if self.has_write_permission(request):
+                return super().create(request, *args, **kwargs)
+        return Response({'error': 'No permission for this patient'}, status=status.HTTP_403_FORBIDDEN)
+
+    def update(self, request, *args, **kwargs):
+        if self.has_write_permission(request):
+                return super().update(request, *args, **kwargs)
+        return Response({'error': 'No permission for this patient'}, status=status.HTTP_403_FORBIDDEN)
+
+    def partial_update(self, request, *args, **kwargs):
+        if self.has_write_permission(request):
+                return super().partial_update(request, *args, **kwargs)
+        return Response({'error': 'No permission for this patient'}, status=status.HTTP_403_FORBIDDEN)
+
+    def destroy(self, request, *args, **kwargs):
+        if self.has_destroy_permission(request):
+                return super().destroy(request, *args, **kwargs)
+        return Response({'error': 'No permission for this patient'}, status=status.HTTP_403_FORBIDDEN)
+
+class GlucoseViewSet(MeasurementViewSet):
     serializer_class = GlucoseSerializer
-    authentication_classes = [SessionAuthentication, BasicAuthentication]
-    permission_classes = [IsAuthenticated]
+    measurement_class = Glucose
 
-    def list(self, request, *args, **kwargs):
-        if hasattr(request.user, 'patient'):
-            patient_id = request.user.patient.id
-            data =  self.get_queryset().filter(patient_id=patient_id)
-            return Response(self.get_serializer(data, many=True), status=status.HTTP_200_OK)
-        elif hasattr(request.user, 'physician'):
-            physician_id = request.user.physician.id
-            patients = Patient.objects.filter(physician_id=physician_id)
-            patient_ids = [patient.id for patient in patients]
-            data =  self.get_queryset().filter(patient_id__in=patient_ids)
-            return Response(self.get_serializer(data, many=True), status=status.HTTP_200_OK)
-        return Response(status=status.HTTP_200_OK)
-
-class BloodViewSet(viewsets.ModelViewSet):
-    queryset = Blood.objects.all()
+class BloodViewSet(MeasurementViewSet):
     serializer_class = BloodSerializer
-    authentication_classes = [SessionAuthentication, BasicAuthentication]
-    permission_classes = [IsAuthenticated]
-
-    def list(self, request, *args, **kwargs):
-        if hasattr(request.user, 'patient'):
-            patient_id = request.user.patient.id
-            return self.get_queryset().filter(patient_id=patient_id)
-        elif hasattr(request.user, 'physician'):
-            physician_id = request.user.physician.id
-            patients = Patient.objects.filter(physician_id=physician_id)
-            patient_ids = [patient.id for patient in patients]
-            return self.get_queryset().filter(patient_id__in=patient_ids)
-        return Response(status=status.HTTP_400_BAD_REQUEST)
-
-class AppointmentViewSet(viewsets.ModelViewSet):
-    queryset = Appointment.objects.all()
-    serializer_class = AppointmentSerializer
+    measurement_class = Blood
 
 
-class ReceptionViewSet(viewsets.ModelViewSet):
-    queryset = Reception.objects.all()
-    serializer_class = ReceptionSerializer
+
+# class AppointmentViewSet(viewsets.ModelViewSet):
+#     queryset = Appointment.objects.all()
+#     serializer_class = AppointmentSerializer
+#
+#
+# class ReceptionViewSet(viewsets.ModelViewSet):
+#     queryset = Reception.objects.all()
+#     serializer_class = ReceptionSerializer
 
 
 class WebUserViewSet(viewsets.ModelViewSet, metaclass=ABCMeta):
@@ -257,7 +283,12 @@ class PatientWebViewSet(WebUserViewSet):
 
         request.session['patient_id'] = pk
 
-        return Response(template_name='diaweb/measurements.html', status=status.HTTP_200_OK)
+        return Response(
+            data={
+                'name': 'Patient',
+            },
+            template_name='diaweb/measurements.html',
+            status=status.HTTP_200_OK)
 
 
 class PhysicianWebViewSet(WebUserViewSet):

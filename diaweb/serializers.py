@@ -1,7 +1,7 @@
 from rest_framework import serializers
 from rest_framework.relations import PrimaryKeyRelatedField
 
-from .models import Address, Patient, Physician, Glucose, Blood, Appointment, Reception, User
+from .models import Address, Patient, Physician, Glucose, Blood, Reception, User
 
 
 class AddressSerializer(serializers.ModelSerializer):
@@ -117,16 +117,6 @@ class BloodSerializer(serializers.ModelSerializer):
     class Meta:
         model = Blood
         fields = '__all__'
-
-
-class AppointmentSerializer(serializers.ModelSerializer):
-    patient = PatientSerializer(read_only=True)
-    physician = PhysicianSerializer(read_only=True, allow_null=True, required=False)
-
-    class Meta:
-        model = Appointment
-        fields = '__all__'
-
 
 class ReceptionSerializer(serializers.ModelSerializer):
     physician = PrimaryKeyRelatedField(queryset=Physician.objects.all(), allow_null=True, required=False)

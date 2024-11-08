@@ -159,13 +159,6 @@ class Blood(models.Model):
             models.CheckConstraint(check=models.Q(pulse_rate__gte=0), name='Pulse_rate_positive_number'),
         ]
 
-
-class Appointment(models.Model):
-    patient = models.ForeignKey(Patient, on_delete=models.CASCADE)
-    physician = models.ForeignKey(Physician, on_delete=models.SET_NULL, null=True)
-    date = models.DateTimeField()
-
-
 class Reception(models.Model):
     DAYS = {
         1: "Monday",

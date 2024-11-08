@@ -41,7 +41,11 @@
             <div class="page-header" style="margin-bottom: 2%">
                 <ul id="registration-nav" class="breadcrumb" style="margin-top: 2%">
                     <li class="active"><h1>{{ data.result }}</h1></li>
-                    <li class="active navbar-btn"><button onclick="history.back()">Return</button></li>
+                    {% if data.name == 'Patient' %}
+                    <li class="active navbar-btn"><button onclick="location.href='{% url 'web-patient-list' %}'">Return</button></li>
+                    {% else %}
+                    <li class="active navbar-btn"><button onclick="location.href='{% url 'web-physician-list' %}'">Return</button></li>
+                    {% endif %}
                 </ul>
                 
             </div>
@@ -51,14 +55,16 @@
         </div>
 
         <div class="tabbable">
-                
-                    <a class="navbar-brand"  href="javascript:history.back()">Return</a>
-                    <ul class="nav navbar-nav pull-right">
                     {% if data.name == 'Patient' %}
-                        <li class="navbar-btn"><button class="btn btn-primary js-tooltip" >Change Diabetes Status</button></li>
-                        <li class="navbar-btn"><a href="{% url 'web-patient-measurements' pk=data.pk %}"><button class="btn btn-primary js-tooltip">Measurements Data Analysis</button></a></li>
+                        <a class="navbar-brand"  href="{% url 'web-patient-list' %}">Return</a>
+                        <ul class="nav navbar-nav pull-right">
+                            <li class="navbar-btn"><button class="btn btn-primary js-tooltip" >Change Diabetes Status</button></li>
+                            <li class="navbar-btn"><a href="{% url 'web-patient-measurements' pk=data.pk %}"><button class="btn btn-primary js-tooltip">Measurements Data Analysis</button></a></li>
+                        </ul>
+                    {% else %}
+                        <a class="navbar-brand"  href="{% url 'web-physician-list' %}">Return</a>
                     {% endif %}
-                    </ul>
+                    
         </div>
         
 {% endblock %}

@@ -31,7 +31,8 @@
         {% else %}
             <li class="active"><a href="{% url 'web-physician-list' %}">{{ data.name }} List</a></li>
         {% endif %}
-        <li class="active"><a href="">{{ data.name }} Detail</a></li>
+        <li class="active"><a href="{% url 'web-patient-detail' pk=request.session.patient_id %}">{{ data.name }} Detail</a></li>
+        <li class="active"><a href="">Measurements</a></li>
     </ul>
 {% endblock %}
 
@@ -42,7 +43,7 @@
             <div class="page-header" style="margin-bottom: 2%">
                 <ul id="registration-nav" class="breadcrumb" style="margin-top: 2%">
                     <li class="active"><h1>Patient Measures</h1></li>
-                    <li class="active navbar-btn"><button onclick="history.back()">Return</button></li>
+                    <li class="active navbar-btn"><button onclick="location.href='{% url 'web-patient-detail' pk=request.session.patient_id %}'">Return</button></li>
                 </ul>
                 
             </div>
@@ -56,7 +57,7 @@
 
         <div class="tabbable">
                 
-                    <a class="navbar-brand"  href="javascript:history.back()">Return</a>
+                    <a class="navbar-brand"  href="{% url 'web-patient-detail' pk=request.session.patient_id %}">Return</a>
                 
             
         </div>

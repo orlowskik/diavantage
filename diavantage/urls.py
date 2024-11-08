@@ -22,20 +22,19 @@ from rest_framework import routers
 
 
 
-from diaweb.views import PatientViewSet, PhysicianViewSet, AddressViewSet, GlucoseViewSet, BloodViewSet, \
-    AppointmentViewSet, ReceptionViewSet, \
+from diaweb.views import PatientViewSet, PhysicianViewSet, GlucoseViewSet, BloodViewSet, \
     BasicPageView, registration_view, PatientWebViewSet, PhysicianWebViewSet, MainPageView, \
-    UserViewSet, get_csrf
+    get_csrf
 
 router = routers.DefaultRouter()
 router.register(r'patients', PatientViewSet)
 router.register(r'physicians', PhysicianViewSet)
-router.register(r'addresses', AddressViewSet)
-router.register(r'glucose', GlucoseViewSet)
-router.register(r'bloods', BloodViewSet)
-router.register(r'appointments', AppointmentViewSet)
-router.register(r'receptions', ReceptionViewSet)
-router.register(r'users', UserViewSet)
+# router.register(r'addresses', AddressViewSet)
+router.register(r'glucose', GlucoseViewSet, basename='glucose')
+router.register(r'bloods', BloodViewSet, basename='blood')
+# router.register(r'appointments', AppointmentViewSet)
+# router.register(r'receptions', ReceptionViewSet)
+# router.register(r'users', UserViewSet)
 
 
 web_router = routers.SimpleRouter()
