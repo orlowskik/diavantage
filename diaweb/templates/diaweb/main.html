@@ -47,9 +47,9 @@
                             <h4 class="list-group-item-heading">My account</h4>
                             <p class="list-group-item-text">View your account information</p>
                         </a>
-                        <a href="{% url 'main'  %}" class="list-group-item">
+                        <a href="{% url 'web-patient-measurements' pk=user.patient.pk %}" class="list-group-item">
                             <h4 class="list-group-item-heading">My data</h4>
-                            <p class="list-group-item-text">View your health information</p>
+                            <p class="list-group-item-text">View your health statistics</p>
                         </a>
                     {% endif %}
                     <a href="{% url 'web-physician-list'  %}" class="list-group-item">

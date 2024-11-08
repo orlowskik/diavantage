@@ -1,6 +1,8 @@
 import json
 import os
 
+from django.core.serializers import get_serializer
+
 import diaweb.graphs
 
 from abc import ABCMeta, abstractmethod
@@ -65,6 +67,7 @@ class PatientViewSet(viewsets.ModelViewSet):
         return Response(status=status.HTTP_200_OK, data={'patient_id': None})
 
 
+
 class PhysicianViewSet(viewsets.ModelViewSet):
     queryset = Physician.objects.all()
     serializer_class = PhysicianSerializer
@@ -81,12 +84,35 @@ class GlucoseViewSet(viewsets.ModelViewSet):
     authentication_classes = [SessionAuthentication, BasicAuthentication]
     permission_classes = [IsAuthenticated]
 
-
+    def list(self, request, *args, **kwargs):
+        if hasattr(request.user, 'patient'):
+            patient_id = request.user.patient.id
+            data =  self.get_queryset().filter(patient_id=patient_id)
+            return Response(self.get_serializer(data, many=True), status=status.HTTP_200_OK)
+        elif hasattr(request.user, 'physician'):
+            physician_id = request.user.physician.id
+            patients = Patient.objects.filter(physician_id=physician_id)
+            patient_ids = [patient.id for patient in patients]
+            data =  self.get_queryset().filter(patient_id__in=patient_ids)
+            return Response(self.get_serializer(data, many=True), status=status.HTTP_200_OK)
+        return Response(status=status.HTTP_200_OK)
 
 class BloodViewSet(viewsets.ModelViewSet):
     queryset = Blood.objects.all()
     serializer_class = BloodSerializer
+    authentication_classes = [SessionAuthentication, BasicAuthentication]
+    permission_classes = [IsAuthenticated]
 
+    def list(self, request, *args, **kwargs):
+        if hasattr(request.user, 'patient'):
+            patient_id = request.user.patient.id
+            return self.get_queryset().filter(patient_id=patient_id)
+        elif hasattr(request.user, 'physician'):
+            physician_id = request.user.physician.id
+            patients = Patient.objects.filter(physician_id=physician_id)
+            patient_ids = [patient.id for patient in patients]
+            return self.get_queryset().filter(patient_id__in=patient_ids)
+        return Response(status=status.HTTP_400_BAD_REQUEST)
 
 class AppointmentViewSet(viewsets.ModelViewSet):
     queryset = Appointment.objects.all()
@@ -108,11 +134,6 @@ class WebUserViewSet(viewsets.ModelViewSet, metaclass=ABCMeta):
     @property
     @abstractmethod
     def create_target(self):
-        pass
-
-    @property
-    @abstractmethod
-    def queryset(self):
         pass
 
     @property
@@ -196,15 +217,43 @@ class WebUserViewSet(viewsets.ModelViewSet, metaclass=ABCMeta):
 
 
 class PatientWebViewSet(WebUserViewSet):
-    queryset = Patient.objects.all()
     serializer_class = PatientSerializer
     hidden_fields = ['id', 'confirmed_diabetes', 'classifier_result', 'last_appointment']
     create_target = 'web-patient-list'
+
+    def get_queryset(self):
+        user = self.request.user
+        if hasattr(user, 'patient'):
+            return Patient.objects.filter(id=user.patient.id)
+        if hasattr(user, 'physician'):
+            return Patient.objects.filter(physician=user.physician)
 
     @action(detail=True, methods=[HTTPMethod.GET])
     def measurements(self, request, pk=None, *args, **kwargs):
         if pk is None:
             raise IndexError('Patient ID required')
+        pk_int = int(pk)
+
+        if self.request.user.is_anonymous:
+            return Response(data = {
+                'status': status.HTTP_401_UNAUTHORIZED,
+                "content": "Not logged in"},
+                status=status.HTTP_401_UNAUTHORIZED, template_name='diaweb/error_page.html')
+        elif hasattr(self.request.user, 'patient'):
+            if self.request.user.patient.id != pk_int:
+                return Response(data={
+                    'status': status.HTTP_401_UNAUTHORIZED,
+                    "content": "No permission for this patient's data"},
+                    status=status.HTTP_401_UNAUTHORIZED, template_name='diaweb/error_page.html')
+
+        if hasattr(self.request.user, 'physician'):
+            patients = Patient.objects.filter(physician=self.request.user.physician)
+            print([patient.id == pk_int for patient in patients])
+            if not any(patient.id == pk_int for patient in patients):
+                return Response(data={
+                    'status': status.HTTP_401_UNAUTHORIZED,
+                    "content": "No permission for this patient's data"},
+                    status=status.HTTP_401_UNAUTHORIZED, template_name='diaweb/error_page.html')
 
         request.session['patient_id'] = pk
 

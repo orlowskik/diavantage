@@ -1,0 +1,46 @@
+{% extends 'rest_framework/base.html' %}
+{% load rest_framework %}
+{% load i18n %}
+{% load static %}
+
+
+{% block title %}
+    Error page
+{% endblock %}
+
+{% block style %}
+    {{ block.super }}
+    <link rel="stylesheet" type="text/css" href="{% static 'diaweb/style.css' %}">
+{% endblock %}
+
+{% block branding %}
+    <a class="navbar-brand" href="{% url 'index' %}">DiaVantage Error Page</a>
+{% endblock %}
+
+{%  block breadcrumbs %}
+    <ul class="breadcrumb">
+        <li class="active"><a href="{% url 'main' %}">Main</a></li>
+    </ul>
+{% endblock %}
+
+{% block userlinks %}
+
+{% endblock %}
+
+{% block content %}
+     <div class="content-main">
+        <div class="page-header">
+            <ul id="registration-nav" class="breadcrumb" style="margin-top: 2%">
+                <li class="active"><h1>Error Page</h1></li>
+            </ul>
+        </div>
+        <div class="response-info" aria-label="{% trans "response info" %}">
+            <pre class="prettyprint">
+                <span class="meta nocode">
+                    <b>HTTP {{ data.status }} {{ data.content }}</b>
+                </span>{{ content|urlize }}
+            </pre>
+        </div>
+     </div>
+    <a class="navbar-brand"  href="javascript:history.back()">Return</a>
+{% endblock %}

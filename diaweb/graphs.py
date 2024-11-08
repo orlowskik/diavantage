@@ -89,17 +89,21 @@ def update_data_statistics(slider_values, graph_types, *args, **kwargs):
     result = pd.DataFrame()
 
     if 'Glucose' in graph_types:
-        data = Glucose.objects.filter(patient_id=patient_id, measurement_date__gte=min_date, measurement_date__lte=max_date).values('measurement',)
+        data = Glucose.objects.filter(patient_id=patient_id, measurement_date__gte=min_date, measurement_date__lte=max_date).values('measurement', 'measurement_type')
         try:
-            df = pd.DataFrame(data).describe()
-            df = df._append(pd.Series({'measurement': 'GLU'}, name="type"))
-
-            result = result._append(df['measurement'])
+            df = pd.DataFrame(data)
+            grouped_data = df.groupby(['measurement_type'], as_index=True)
+            group_keys = grouped_data.groups.keys()
+            types = [f"GLU - {Glucose.MEASUREMENT_TYPES[i]}" for i in group_keys]
+            statistics = grouped_data.describe()['measurement']
+            statistics.insert(0, 'type', types)
+            print(statistics)
+            result = result._append(statistics)
         except ValueError:
             pass
 
     if 'Sys' in graph_types:
-        data = Blood.objects.filter(measurement_date__gte=min_date, measurement_date__lte=max_date).values('systolic_pressure')
+        data = Blood.objects.filter(patient_id=patient_id,measurement_date__gte=min_date, measurement_date__lte=max_date).values('systolic_pressure')
         try:
             df = pd.DataFrame(data).describe()
             df = df._append(pd.Series({'systolic_pressure': 'SYS'}, name="type"))
@@ -109,7 +113,7 @@ def update_data_statistics(slider_values, graph_types, *args, **kwargs):
             pass
 
     if 'Dia' in graph_types:
-        data = Blood.objects.filter(measurement_date__gte=min_date, measurement_date__lte=max_date).values('diastolic_pressure')
+        data = Blood.objects.filter(patient_id=patient_id, measurement_date__gte=min_date, measurement_date__lte=max_date).values('diastolic_pressure')
         try:
             df = pd.DataFrame(data).describe()
 
@@ -121,12 +125,11 @@ def update_data_statistics(slider_values, graph_types, *args, **kwargs):
 
 
     if 'Pulse' in graph_types:
-        data = Blood.objects.filter(measurement_date__gte=min_date, measurement_date__lte=max_date).values('pulse_rate')
+        data = Blood.objects.filter(patient_id=patient_id, measurement_date__gte=min_date, measurement_date__lte=max_date).values('pulse_rate')
         try:
             df = pd.DataFrame(data).describe()
 
             df = df._append(pd.Series({'pulse_rate': 'PUL'}, name="type"))
-
             result = result._append(df['pulse_rate'])
         except ValueError:
             pass
